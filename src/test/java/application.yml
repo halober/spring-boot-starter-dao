@@ -1,11 +1,11 @@
 spring:
   druid:
     stat:
-      enable: true                        # 启用druid监控控制台
+      enable: false                        # 启用druid监控控制台
       allow: ''                           # IP白名单 (没有配置或者为空，则允许所有访问)
       deny: ''                            # IP黑名单 (存在共同时，deny优先于allow)
       loginUsername: 'leige'              # 用户名
-      loginPassword: '619137943'          # 密码
+      loginPassword: 'leige'              # 密码
       exclusions: '*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*' # WebStatFilter忽略资源
       resetEnable: false                  #禁用HTML页面上的“Reset All”功能
       

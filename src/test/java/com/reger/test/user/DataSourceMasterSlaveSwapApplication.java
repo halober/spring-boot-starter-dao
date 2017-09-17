@@ -3,6 +3,7 @@ package com.reger.test.user;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,12 +16,12 @@ import com.reger.test.user.model.User;
 public class DataSourceMasterSlaveSwapApplication implements CommandLineRunner {
 
 	public static void main(String[] args) throws Exception {
-		SpringApplication.run(DataSourceMasterSlaveSwapApplication.class, args).close();
+		SpringApplication.run(DataSourceMasterSlaveSwapApplication.class, args);
 	}
 
 	@Autowired
 	private UserMapper mapper;
-	@Autowired
+	@Autowired@Qualifier("userJdbcTemplate")
 	JdbcTemplate userJdbcTemplate;
 
 	@Override
