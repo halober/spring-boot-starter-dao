@@ -154,8 +154,11 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		registry.registerBeanDefinition(sqlSessionFactoryBeanName, sqlSessionFactoryBean);
 		registry.registerBeanDefinition(scannerConfigurerName, scannerConfigurer);
 		
-		if(primary)
+		if(primary){
 			registry.registerAlias(dataSourceName, "dataSource");
+			registry.registerAlias(jdbcTemplateName, "jdbcTemplate");
+			registry.registerAlias(transactionManagerName, "transactionManager");
+		}
 	}
 
 	@Bean
