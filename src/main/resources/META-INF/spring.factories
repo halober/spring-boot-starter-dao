@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.reger.datasource.config.DataSourceAutoConfiguration,\
+com.reger.datasource.config.DruidWebStatAutoConfiguration
