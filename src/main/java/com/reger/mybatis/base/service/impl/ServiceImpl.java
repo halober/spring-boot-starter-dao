@@ -38,16 +38,16 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	 * 一个基础对象转化为一个输出对象输出
 	 * 
 	 * @param t
-	 * @return
+	 * @return 输出对象
 	 */
 	protected abstract TO out(T t, OpsUser opsUser);
 
 	/**
 	 * 转化输出列表对象
 	 * 
-	 * @param t
+	 * @param collection
 	 * @param opsUser
-	 * @return
+	 * @return 输出对象
 	 */
 	protected List<TO> out(Collection<T> collection, OpsUser opsUser) {
 		if(collection==null)
@@ -58,7 +58,7 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	/**
 	 * 转化输出分页对象
 	 * @param page
-	 * @return
+	 * @return 输出对象
 	 */
 	@SuppressWarnings("unchecked")
 	protected PageInfo<TO> outPage(Page<T> page, OpsUser opsUser ) {
@@ -78,7 +78,7 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	 * 保存时编辑对象
 	 * 
 	 * @param ti
-	 * @return
+	 * @return 输出对象
 	 */
 	protected abstract T saveBuild(TI ti, OpsUser opsUser);
 
@@ -127,7 +127,7 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	 * @param id
 	 * @param now
 	 * @param old
-	 * @return
+	 * @return 输出对象
 	 */
 	protected abstract T updateBuild(ID id, TU now, T old, OpsUser opsUser);
 
@@ -157,7 +157,7 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	/**
 	 * 列出时，确定查询条件
 	 * 
-	 * @return
+	 * @return 输出对象
 	 */
 	protected T listBuild(OpsUser opsUser){
 		return null;
@@ -178,7 +178,7 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	 * @param pageno
 	 * @param pagesize
 	 * @param ti
-	 * @return
+	 * @return 输出对象
 	 */
 	protected Page<T> searchProcess(int pageno, int pagesize, String keywords, TS ti, OpsUser opsUser) {
 		Assert.notNull(mapper, "没有正确注入mapper层");
