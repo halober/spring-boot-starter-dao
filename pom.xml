@@ -15,7 +15,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.5.7.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
 
 	<properties>
@@ -99,14 +99,14 @@
 		<dependency>
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
-		    <scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 		
 		<dependency>
 			<groupId>com.gitee.reger</groupId>
 			<artifactId>spring-boot-starter-swagger</artifactId>
 			<version>1.0.1</version>
-			<scope>runtime</scope>
+			<optional>true</optional>
 		</dependency>
 		
 		<dependency>
