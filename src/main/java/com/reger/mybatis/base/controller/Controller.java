@@ -1,7 +1,6 @@
 //package com.reger.mybatis.base.controller;
 //
 //import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.ResponseEntity;
 //import org.springframework.util.Assert;
 //import org.springframework.web.bind.annotation.DeleteMapping;
 //import org.springframework.web.bind.annotation.GetMapping;
@@ -86,7 +85,7 @@
 //		Assert.notNull(service, "没有正确注入service层");
 //		OpsUser opsUser= getOpsUser();
 //		service.del(id,opsUser);
-//		return ResponseEntity.now();
+//		return ResponseEntity.s();
 //	}
 //
 //	/**

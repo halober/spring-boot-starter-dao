@@ -28,9 +28,9 @@
     
     <scm>
         <tag>master</tag>
-        <url>https://gitee.com/reger/spring-boot-starter-dubbo</url>
-        <connection>scm:git:git@gitee.com:reger/spring-boot-starter-dubbo.git</connection>
-        <developerConnection>scm:git:git@gitee.com:reger/spring-boot-starter-dubbo.git</developerConnection>
+        <url>https://gitee.com/reger/spring-boot-starter-dao</url>
+        <connection>scm:git:git@gitee.com:reger/spring-boot-starter-dao.git</connection>
+        <developerConnection>scm:git:git@gitee.com:reger/spring-boot-starter-dao.git</developerConnection>
     </scm>
     
     <developers>
@@ -170,14 +170,7 @@
 		    <artifactId>javax.servlet-api</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
-		<dependency>
-			<groupId>com.gitee.reger</groupId>
-			<artifactId>spring-boot-starter-swagger</artifactId>
-			<version>1.0.1</version>
-			<optional>true</optional>
-		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
