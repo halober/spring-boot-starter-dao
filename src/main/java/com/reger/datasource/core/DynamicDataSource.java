@@ -40,7 +40,7 @@ public class DynamicDataSource extends AbstractDataSource {
 		}
 	};
  
-	private static int selectnum = 0;
+	private volatile int selectnum = 0;
 
 	protected static void useMaster() {
 		ismaster.get().push(true);
@@ -158,8 +158,8 @@ public class DynamicDataSource extends AbstractDataSource {
 			return null;
 		}
 		if (slavesDataSourceNames != null) {
-			String slavesDataSourceName = slavesDataSourceNames
-					.get(selectnum = (++selectnum % (slavesDataSourceNames.size())));
+			String slavesDataSourceName = slavesDataSourceNames.get(selectnum);
+			selectnum = (++selectnum % (slavesDataSourceNames.size()));
 			logger.debug("切换到从库{}中查询", slavesDataSourceName);
 			return slavesDataSourceName;
 		}
@@ -186,6 +186,7 @@ public class DynamicDataSource extends AbstractDataSource {
 			master = new DruidProperties();
 		master.merge(defaultDruidProperties).defaultEmpty().setDefaultReadOnly(false);
 		this.masterDataSource = master.createDataSource();
+		this.masterDataSource.setName(dataSourceName + "-Master");
 		List<DruidProperties> slaves = druidNode.getSlaves();
 		if (slaves != null && !slaves.isEmpty()) {
 			for (int i = 0; i < slaves.size(); i++) {
@@ -193,10 +194,11 @@ public class DynamicDataSource extends AbstractDataSource {
 				if (slave == null)
 					continue;
 				slave.merge(defaultDruidProperties).defaultEmpty().setDefaultReadOnly(true);
-				;
-				String datasourcename = dataSourceName + "-Slave-" + i;
-				this.slavesDataSourceNames.add(datasourcename);
-				this.resolvedDataSources.put(datasourcename, slave.createDataSource());
+				String slaveDatasourceName = dataSourceName + "-Slave-" + i;
+				this.slavesDataSourceNames.add(slaveDatasourceName);
+				DruidDataSource datasourc = slave.createDataSource();
+				datasourc.setName(slaveDatasourceName);
+				this.resolvedDataSources.put(slaveDatasourceName, datasourc);
 			}
 		}
 	}
@@ -208,7 +210,7 @@ public class DynamicDataSource extends AbstractDataSource {
 			try {
 				ds.init();
 			} catch (SQLException e) {
-				logger.warn("从库{}初始化失败", ds.getName(), e);
+				logger.warn("从库{}初始化失败", ds.getName());
 			}
 		});
 	}
