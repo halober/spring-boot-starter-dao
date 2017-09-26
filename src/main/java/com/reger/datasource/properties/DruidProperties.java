@@ -31,31 +31,31 @@ public class DruidProperties {
 	private Properties connectProperties;
 	/**
 	 * 连接池初始化大小 </br>
-	 * 默认值 10
+	 * 默认值 1
 	 */
 	private Integer initialSize;
 	/**
-	 * 最小空闲个数</br> 默认值 -1
+	 * 最小空闲个数</br> 默认值 1
 	 */
 	private Integer minIdle;
 	/**
-	 * 最大激活的连接数</br> 默认值  500
+	 * 最大激活的连接数</br> 默认值  20
 	 */
 	private Integer maxActive;
 	/**
-	 * 获取链接最大等待时间 </br> 默认值 5000
+	 * 获取链接最大等待时间 </br> 默认值 60000L
 	 */
 	private Long maxWait;
 	/**
-	 * Druid开启的filter</br> 默认值   stat
+	 * Druid开启的filter 默认值  wall,stat
 	 */
-	private String filters;
+	private String filters="wall,stat";
 	/**
 	 * 是否自动提交事务</br> 默认值  true
 	 */
 	private Boolean defaultAutoCommit;
 	/**
-	 * </br> 默认值 
+	 * </br> 默认值 6000L
 	 */
 	private Long timeBetweenConnectErrorMillis;
 	/**
@@ -148,11 +148,11 @@ public class DruidProperties {
 	 */
 	private Integer defaultTransactionIsolation;
 	/**
-	 * </br> 默认值 
+	 * </br> 默认值  60000L
 	 */
 	private Long timeBetweenEvictionRunsMillis;
 	/**
-	 * </br> 默认值 
+	 * </br> 默认值  300000L
 	 */
 	private Long minEvictableIdleTimeMillis;
 	/**
@@ -211,7 +211,6 @@ public class DruidProperties {
 		dataSource.setAccessToUnderlyingConnectionAllowed(accessToUnderlyingConnectionAllowed);
 		dataSource.setMaxPoolPreparedStatementPerConnectionSize(maxPoolPreparedStatementPerConnectionSize);
 		dataSource.setQueryTimeout(queryTimeout);
-		;
 		dataSource.setFailFast(failFast);
 		dataSource.setMaxCreateTaskCount(maxCreateTaskCount);
 		dataSource.setRemoveAbandoned(removeAbandoned);
@@ -229,18 +228,27 @@ public class DruidProperties {
 
 	public DruidProperties defaultEmpty() {
 		DruidProperties druidProperties = new DruidProperties();
-		druidProperties.initialSize = 10;
-		druidProperties.minIdle = -1;
-		druidProperties.maxActive = 500;
-		druidProperties.maxWait = 5000L;
-		druidProperties.filters = "stat";
-		druidProperties.defaultAutoCommit = true;
-		druidProperties.timeBetweenConnectErrorMillis = 500L;
+		druidProperties.initialSize = 1;
+		druidProperties.minIdle = 1;
+		druidProperties.maxActive = 20;
+		
+		druidProperties.maxWait = 60000L;
+
+		druidProperties.timeBetweenEvictionRunsMillis = 60000L;
+		druidProperties.minEvictableIdleTimeMillis=300000L;
+
 		druidProperties.validationQuery = "SELECT 0 ;";
 		druidProperties.testWhileIdle = true;
 		druidProperties.testOnBorrow = false;
 		druidProperties.testOnReturn = false;
+		
 		druidProperties.poolPreparedStatements = true;
+		druidProperties.maxPoolPreparedStatementPerConnectionSize = 20;
+		
+		druidProperties.timeBetweenConnectErrorMillis = 6000L;
+		
+		druidProperties.filters = "wall,stat";
+		druidProperties.defaultAutoCommit = true;
 		druidProperties.clearFiltersEnable = false;
 		druidProperties.defaultReadOnly = false;
 		druidProperties.asyncCloseConnectionEnable = true;
@@ -252,15 +260,12 @@ public class DruidProperties {
 		druidProperties.logDifferentThread = true;
 		druidProperties.loginTimeout = 5000;
 		druidProperties.accessToUnderlyingConnectionAllowed = true;
-		druidProperties.maxPoolPreparedStatementPerConnectionSize = 1024;
 		druidProperties.queryTimeout = 3000;
 		druidProperties.failFast = true;
 		druidProperties.maxCreateTaskCount = 4;
 		druidProperties.removeAbandoned = true;
 		druidProperties.removeAbandonedTimeoutMillis = 3600000L;
 		druidProperties.defaultTransactionIsolation = 1;
-		druidProperties.timeBetweenEvictionRunsMillis = 60000L;
-		druidProperties.minEvictableIdleTimeMillis = 300000L;
 		druidProperties.maxEvictableIdleTimeMillis = 3000000L;
 		druidProperties.maxOpenPreparedStatements = 200;
 		druidProperties.notFullTimeoutRetryCount = 500;

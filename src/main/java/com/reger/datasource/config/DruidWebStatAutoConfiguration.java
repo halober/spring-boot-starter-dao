@@ -47,7 +47,7 @@ public class DruidWebStatAutoConfiguration {
 		FilterRegistrationBean filterRegistration = new FilterRegistrationBean(new WebStatFilter());
 		filterRegistration.setAsyncSupported(true);
 		filterRegistration.setEnabled(true);
-		filterRegistration.addUrlPatterns("/*");
+		filterRegistration.addUrlPatterns(druidStatConfig.getFilterUrlPatterns());
 		filterRegistration.setInitParameters(druidStatParameters(druidStatConfig));
 		return filterRegistration;
 	}

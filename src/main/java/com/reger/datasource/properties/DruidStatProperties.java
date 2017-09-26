@@ -10,15 +10,16 @@ public class DruidStatProperties {
 	/**
 	 * 是否启用druid监控界面
 	 */
-	private boolean enable;
+	private boolean enable=false;
+	
 	/**
 	 * # IP白名单 (没有配置或者为空，则允许所有访问)
 	 */
-	private String  allow;
+	private String  allow="";
 	/**
 	 * # IP黑名单 (存在共同时，deny优先于allow)
 	 */
-	private String deny;
+	private String deny="";
 	/**
 	 * #禁用HTML页面上的“Reset All”功能
 	 */
@@ -26,7 +27,7 @@ public class DruidStatProperties {
 	/**
 	 * : '*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*' # WebStatFilter忽略资源
 	 */
-	private String  exclusions;
+	private String  exclusions="*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*";
 	/**
 	 * # 用户名
 	 */
@@ -36,6 +37,10 @@ public class DruidStatProperties {
 	 */
 	private String loginPassword;
 	
+	/**
+	 * WebStatFilter 过滤匹配的url
+	 */
+	private String filterUrlPatterns="/*";
 	
 	public boolean isEnable() {
 		return enable;
@@ -78,5 +83,11 @@ public class DruidStatProperties {
 	}
 	public void setLoginPassword(String loginPassword) {
 		this.loginPassword = loginPassword;
+	}
+	public String getFilterUrlPatterns() {
+		return filterUrlPatterns;
+	}
+	public void setFilterUrlPatterns(String filterUrlPatterns) {
+		this.filterUrlPatterns = filterUrlPatterns;
 	}
 }
