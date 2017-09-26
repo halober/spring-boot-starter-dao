@@ -114,27 +114,30 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		Mapper mappers = nodeProperties.getMapper();
 		String basepackage = nodeProperties.getBasePackage();
 		if (StringUtils.isEmpty(basepackage)) {
-			log.warn("BasePackage为空，db配置失效,当前配置数据对象的名字{}", druidNodeName);
-			return;
+			log.warn("BasePackage为空，db配置异常,当前配置数据源对象的名字{}", druidNodeName);
+			basepackage="";
 		}
 		boolean primary = nodeProperties.isPrimary();
 		String dataSourceName = druidNodeName+"DataSource" ;
+		String dataSourceMasterName = druidNodeName+"DataSource-Master" ;
 		String jdbcTemplateName = druidNodeName+"JdbcTemplate" ;
 		String transactionManagerName = druidNodeName;
 		String sqlSessionFactoryBeanName = druidNodeName + "RegerSqlSessionFactoryBean";
 		String scannerConfigurerName = druidNodeName + "RegerScannerConfigurer";
 
-		AbstractBeanDefinition dataSource = createDataSource(nodeProperties, druidProperties, dataSourceName);
-		AbstractBeanDefinition jdbcTemplate = createJdbcTemplate(dataSourceName);
-		AbstractBeanDefinition transactionManager = createTransactionManager(dataSourceName);
+		AbstractBeanDefinition dataSource = super.createDataSource(nodeProperties, druidProperties, dataSourceName);
+		AbstractBeanDefinition dataSourceMaster = super.createDataSourceMaster(dataSourceName);
+		AbstractBeanDefinition jdbcTemplate = super.createJdbcTemplate(dataSourceName);
+		AbstractBeanDefinition transactionManager = super.createTransactionManager(dataSourceMasterName);
 
-		AbstractBeanDefinition sqlSessionFactoryBean = createSqlSessionFactoryBean(dataSourceName, mapperPackage, typeAliasesPackage, configuration);
-		AbstractBeanDefinition scannerConfigurer = createScannerConfigurerBean(sqlSessionFactoryBeanName, basepackage,
-				mappers, order);
+		AbstractBeanDefinition sqlSessionFactoryBean = super.createSqlSessionFactoryBean(dataSourceName, mapperPackage, typeAliasesPackage, configuration);
+		AbstractBeanDefinition scannerConfigurer = super.createScannerConfigurerBean(sqlSessionFactoryBeanName, basepackage,mappers, order);
 
 		dataSource.setLazyInit(true);
 		dataSource.setPrimary(primary);
 		dataSource.setScope(BeanDefinition.SCOPE_SINGLETON);
+		dataSourceMaster.setLazyInit(true);
+		dataSourceMaster.setScope(BeanDefinition.SCOPE_SINGLETON);
 		jdbcTemplate.setLazyInit(true);
 		jdbcTemplate.setPrimary(primary);
 		jdbcTemplate.setScope(BeanDefinition.SCOPE_SINGLETON);
@@ -147,8 +150,9 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		scannerConfigurer.setLazyInit(true);
 		scannerConfigurer.setPrimary(primary);
 		scannerConfigurer.setScope(BeanDefinition.SCOPE_SINGLETON);
-
+		
 		registry.registerBeanDefinition(dataSourceName, dataSource);
+		registry.registerBeanDefinition(dataSourceMasterName, dataSourceMaster);
 		registry.registerBeanDefinition(jdbcTemplateName, jdbcTemplate);
 		registry.registerBeanDefinition(transactionManagerName, transactionManager);
 		registry.registerBeanDefinition(sqlSessionFactoryBeanName, sqlSessionFactoryBean);
@@ -166,12 +170,8 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		return new DataSourceAspect();
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	@Bean
-	public DataSourceInvalidRetry dataSourceTest(){
+	public DataSourceInvalidRetry dataSourceInvalidRetry(){
 		return new DataSourceInvalidRetry();
 	}
 }

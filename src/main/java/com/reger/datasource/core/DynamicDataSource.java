@@ -150,7 +150,8 @@ public class DynamicDataSource extends AbstractDataSource {
 	}
 
 	/**
-	 * 如果是选择使用从库，且从库的数量大于1，则通过取模来控制从库的负载,
+	 * 如果是选择使用从库，且从库的数量大于1，则通过取模来控制从库的负载
+	 * @return 选中的库名
 	 */
 	protected String determineCurrentLookupKey() {
 		if (ismaster.get().isEmpty() || ismaster.get().peek()) {
@@ -216,5 +217,9 @@ public class DynamicDataSource extends AbstractDataSource {
 		logger.debug("销毁 DynamicDataSource ...");
 		this.masterDataSource.close();
 		this.resolvedDataSources.values().forEach(ds->ds.close());
+	}
+	
+	public DruidDataSource masterDataSource() {
+		return masterDataSource;
 	}
 }

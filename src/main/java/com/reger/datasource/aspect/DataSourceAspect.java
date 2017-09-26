@@ -1,8 +1,6 @@
 package com.reger.datasource.aspect;
 
 import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -25,13 +23,13 @@ import com.reger.datasource.core.Proxy;
 @Aspect
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class DataSourceAspect {
+	
 	private static final Logger logger = LoggerFactory.getLogger(DataSourceAspect.class);
 
 	@Pointcut(value = "@annotation(com.reger.datasource.annotation.DataSourceChange)")
 	private void changeDataSource() {
 	}
 	
-	static Map<String, Boolean> isOn=new ConcurrentHashMap<>();
 
 	@Around(value = "changeDataSource()", argNames = "point")
 	public Object doAround(ProceedingJoinPoint point) throws Throwable {

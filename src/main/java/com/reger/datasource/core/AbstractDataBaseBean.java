@@ -45,6 +45,13 @@ public abstract class AbstractDataBaseBean{
 		definitionBuilder.setDestroyMethodName("close");
 		return definitionBuilder.getRawBeanDefinition();
 	}
+
+	public AbstractBeanDefinition createDataSourceMaster(String dataSourceName) {
+		return BeanDefinitionBuilder.
+			genericBeanDefinition(DynamicDataSource.class)
+			.setFactoryMethodOnBean("masterDataSource", dataSourceName)
+			.getRawBeanDefinition();
+	}
 	
 	public final  AbstractBeanDefinition createTransactionManager(String dataSourceName) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.genericBeanDefinition(DataSourceTransactionManager.class);
@@ -129,4 +136,5 @@ public abstract class AbstractDataBaseBean{
 		bdb.addPropertyValue("basePackage", basepackage);
 		return bdb.getRawBeanDefinition();
 	}
+
 }
