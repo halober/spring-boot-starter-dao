@@ -9,7 +9,6 @@
 	<packaging>jar</packaging>
 
 	<name>spring-boot-starter-dao</name>
-	<description>spring-boot-starter-dao</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -181,4 +180,14 @@
 		</dependency>
 	</dependencies>
 
+	<organization>
+		<url>https://gitee.com/reger/</url>
+		<name>雷</name>
+	</organization>
+	<ciManagement>
+		<url>https://gitee.com/reger/spring-boot-starter-dao</url>
+		<system>spring-boot-starter-dao</system>
+	</ciManagement>
+	<url>https://gitee.com/reger/spring-boot-starter-dao</url>
+	<description>该项目，整合spring-boot,mybatis,通用mapper,pagehelper,druid等常用dao层库。配置及其简单，使用容易，入门门槛低。本项目支持： 多数据源支持;读写分离支持；druid监控台按需启用支持；注解方式标注枚举映射到数据库中为自定义值指定值，等其它一些功能。</description>
 </project>
