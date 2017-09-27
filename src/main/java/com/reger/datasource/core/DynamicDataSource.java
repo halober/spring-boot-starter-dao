@@ -17,8 +17,8 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.scheduling.annotation.Async;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.reger.datasource.properties.MybatisNodeProperties;
 import com.reger.datasource.properties.DruidProperties;
+import com.reger.datasource.properties.MybatisNodeProperties;
 
 /**
  * 配置主从数据源后，根据选择，返回对应的数据源。多个从库的情况下，会平均的分配从库，用于负载均衡。
@@ -28,10 +28,10 @@ import com.reger.datasource.properties.DruidProperties;
 public class DynamicDataSource extends AbstractDataSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(DynamicDataSource.class);
-
-	private Map<String, DruidDataSource> resolvedDataSources = new LinkedHashMap<String, DruidDataSource>();
+	
+	private String dataSourceName;
 	private DruidDataSource masterDataSource;
-	private MybatisNodeProperties druidNode;
+	private Map<String, DruidDataSource> slaveDataSources = new LinkedHashMap<String, DruidDataSource>();
 	private List<String> slavesDataSourceNames = new LinkedList<>();
 	private List<String> slavesFailureDataSourceNames = new LinkedList<>();
 	private static final ThreadLocal<Stack<Boolean>> ismaster = new ThreadLocal<Stack<Boolean>>() {
@@ -60,7 +60,7 @@ public class DynamicDataSource extends AbstractDataSource {
 	public Connection getConnection() throws SQLException {
 		try {
 			return determineTargetDataSourceConnection();
-		} catch (Throwable e) {
+		} catch (SQLException e) {
 			logger.info("获取jdbc链接失败,重试开始");
 			return determineTargetDataSourceConnection();
 		}
@@ -70,7 +70,7 @@ public class DynamicDataSource extends AbstractDataSource {
 	public Connection getConnection(String username, String password) throws SQLException {
 		try {
 			return determineTargetDataSourceConnection(username, password);
-		} catch (Throwable e) {
+		} catch (SQLException e) {
 			logger.info("获取jdbc链接失败,重试开始");
 			return determineTargetDataSourceConnection(username, password);
 		}
@@ -120,7 +120,7 @@ public class DynamicDataSource extends AbstractDataSource {
 				slavesFailureDataSourceNames.remove(lookupKey);
 				slavesDataSourceNames.add(lookupKey);
 				logger.info("数据库从库{}从异常中恢复过来", lookupKey);
-			} catch (Exception e) {
+			} catch (SQLException e) {
 				logger.debug("测试链接失效的从库{}还没有活过来", lookupKey, e);
 			}
 		}
@@ -143,7 +143,7 @@ public class DynamicDataSource extends AbstractDataSource {
 	}
 
 	protected DataSource determineTargetDataSource(String lookupKey) {
-		DataSource dataSource = this.resolvedDataSources.get(lookupKey);
+		DataSource dataSource = this.slaveDataSources.get(lookupKey);
 		if (dataSource != null)
 			return dataSource;
 		return this.masterDataSource;
@@ -166,10 +166,6 @@ public class DynamicDataSource extends AbstractDataSource {
 		return null;
 	}
 
-	public MybatisNodeProperties getDruidNode() {
-		return druidNode;
-	}
-
 	public static DynamicDataSource create(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties,
 			String dataSourceName) throws SQLException {
 		return new DynamicDataSource(druidNode, defaultDruidProperties, dataSourceName);
@@ -180,7 +176,7 @@ public class DynamicDataSource extends AbstractDataSource {
 
 	public DynamicDataSource(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties, String dataSourceName)
 			throws SQLException {
-		this.druidNode = druidNode;
+		this.dataSourceName=dataSourceName;
 		DruidProperties master = druidNode.getMaster();
 		if (master == null)
 			master = new DruidProperties();
@@ -198,15 +194,15 @@ public class DynamicDataSource extends AbstractDataSource {
 				this.slavesDataSourceNames.add(slaveDatasourceName);
 				DruidDataSource datasourc = slave.createDataSource();
 				datasourc.setName(slaveDatasourceName);
-				this.resolvedDataSources.put(slaveDatasourceName, datasourc);
+				this.slaveDataSources.put(slaveDatasourceName, datasourc);
 			}
 		}
 	}
 	
 	public void init() throws SQLException {
-		logger.debug("初始化 DynamicDataSource ...");
+		logger.debug("初始化 DynamicDataSource {}...",this.dataSourceName);
 		this.masterDataSource.init();
-		this.resolvedDataSources.values().forEach(ds->{
+		this.slaveDataSources.values().forEach(ds->{
 			try {
 				ds.init();
 			} catch (SQLException e) {
@@ -216,9 +212,15 @@ public class DynamicDataSource extends AbstractDataSource {
 	}
 	
 	public void close() {
-		logger.debug("销毁 DynamicDataSource ...");
+		logger.debug("销毁 DynamicDataSource {}...",this.dataSourceName);
 		this.masterDataSource.close();
-		this.resolvedDataSources.values().forEach(ds->ds.close());
+		this.slaveDataSources.values().forEach(ds->{
+			try {
+				ds.close();
+			} catch (Exception e) {
+				logger.warn("关闭从库{}失败", ds.getName());
+			}
+		});
 	}
 	
 	public DruidDataSource masterDataSource() {
