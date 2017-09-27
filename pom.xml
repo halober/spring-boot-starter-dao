@@ -5,7 +5,7 @@
 
 	<groupId>com.gitee.reger</groupId>
 	<artifactId>spring-boot-starter-dao</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>spring-boot-starter-dao</name>
@@ -160,12 +160,12 @@
 		<dependency>
 		    <groupId>mysql</groupId>
 		    <artifactId>mysql-connector-java</artifactId>
-		    <scope>runtime</scope>
+		    <scope>provided</scope>
 		</dependency>
 		<dependency>
 		    <groupId>org.postgresql</groupId>
 		    <artifactId>postgresql</artifactId>
-		    <scope>runtime</scope>
+		    <scope>provided</scope>
 		</dependency>
 		
 		<!-- mybatis.generator -->
