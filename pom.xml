@@ -173,6 +173,7 @@
 		    <groupId>org.mybatis.generator</groupId>
 		    <artifactId>mybatis-generator-core</artifactId>
 		    <version>${mybatis-generator.version}</version>
+			<optional>true</optional>
 		</dependency>
 		
 		<!-- servlet -->
