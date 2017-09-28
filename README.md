@@ -109,7 +109,7 @@ spring:
       remove-abandoned-timeout-millis: 
       test-on-borrow: 
       test-on-return: 
-      test-while-idle: false
+      test-while-idle: 
       time-between-connect-error-millis: 
       time-between-eviction-runs-millis: 
       time-between-log-stats-millis: 
