@@ -54,6 +54,7 @@ git clone https://gitee.com/lei0719/spring-boot-starter-dao-example.git
 在项目跟目录执行 `mvn spring-boot:run `
 
 ### 更多配置参数
+#### 1.druid监控配置
 ```yml
 spring:
   druid:
@@ -66,7 +67,13 @@ spring:
       exclusions: '*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*' # WebStatFilter忽略资源
       resetEnable: false                  #禁用HTML页面上的“Reset All”功能
       filter-url-patterns: '/*'
-      
+
+```
+
+#### 2.druid连接池配置
+```yml
+spring:
+  druid:
     default:                              # druid连接池默认参数，具体主库或者从库的配置会继承该配置
       enable: true
       initial-size: 5                     # 链接池初始化大小
@@ -110,8 +117,11 @@ spring:
       validation-query: 
       validation-query-timeout: 
       connect-properties:
-        
-       
+```
+
+#### 3.mybatis配置
+```yml  
+spring:
   mybatis:
     configuration:                        # mybatis具体的配置参数,所有的mybatis实例都会使用该配置
       cache-enabled: true                 # 是否启用缓存
@@ -133,7 +143,12 @@ spring:
       safe-result-handler-enabled: 
       safe-row-bounds-enabled: 
       use-actual-param-name: 
-      
+```
+
+#### 4.mybatis数据源配置
+```yml
+spring:
+  mybatis:
     nodes:
       user:                                                       # 该数据点的名字
         order: after                                              # mybatis生成主键的顺序，如果要在insert into 数据前获得主键，配置为 BEFORE，否则配置为 AFTER 默认值为 BEFORE
