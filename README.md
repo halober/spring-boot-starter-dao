@@ -70,7 +70,7 @@ spring:
 
 ```
 
-#### 2.druid连接池配置
+#### 2.druid连接池默认配置
 ```yml
 spring:
   druid:
