@@ -49,7 +49,7 @@ git clone https://gitee.com/lei0719/spring-boot-starter-dao-example.git
 #### 3.运行示例项目
 运行示例项目，你首先需要导入数据文件`test.sql`。
 然后修改'application.yml'中db链接的配置参数，如果没有从库，可以先把从库的配置注释掉
-在项目更目录执行 `mvn spring-boot:run `
+在项目跟目录执行 `mvn spring-boot:run `
 
 ### 更多配置参数
 ```yml
