@@ -15,6 +15,8 @@
 ### 快速入门
 快速入门[点击这里](http://blog.csdn.net/hulei19900322/article/details/78118965)
 
+## 交流QQ群： 64409116，有问题或者有建议欢迎加群反馈。
+
 ### 更新记录
 ```log
 1.0.1
@@ -49,9 +51,10 @@ git clone https://gitee.com/lei0719/spring-boot-starter-dao-example.git
 #### 3.运行示例项目
 运行示例项目，你首先需要导入数据文件`test.sql`。
 然后修改'application.yml'中db链接的配置参数，如果没有从库，可以先把从库的配置注释掉
-在项目更目录执行 `mvn spring-boot:run `
+在项目跟目录执行 `mvn spring-boot:run `
 
 ### 更多配置参数
+#### 1.druid监控配置
 ```yml
 spring:
   druid:
@@ -64,7 +67,13 @@ spring:
       exclusions: '*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico,/druid/*' # WebStatFilter忽略资源
       resetEnable: false                  #禁用HTML页面上的“Reset All”功能
       filter-url-patterns: '/*'
-      
+
+```
+
+#### 2.druid连接池默认配置
+```yml
+spring:
+  druid:
     default:                              # druid连接池默认参数，具体主库或者从库的配置会继承该配置
       enable: true
       initial-size: 5                     # 链接池初始化大小
@@ -100,7 +109,7 @@ spring:
       remove-abandoned-timeout-millis: 
       test-on-borrow: 
       test-on-return: 
-      test-while-idle: false
+      test-while-idle: 
       time-between-connect-error-millis: 
       time-between-eviction-runs-millis: 
       time-between-log-stats-millis: 
@@ -108,8 +117,11 @@ spring:
       validation-query: 
       validation-query-timeout: 
       connect-properties:
-        
-       
+```
+
+#### 3.mybatis配置
+```yml  
+spring:
   mybatis:
     configuration:                        # mybatis具体的配置参数,所有的mybatis实例都会使用该配置
       cache-enabled: true                 # 是否启用缓存
@@ -131,7 +143,12 @@ spring:
       safe-result-handler-enabled: 
       safe-row-bounds-enabled: 
       use-actual-param-name: 
-      
+```
+
+#### 4.mybatis数据源配置
+```yml
+spring:
+  mybatis:
     nodes:
       user:                                                       # 该数据点的名字
         order: after                                              # mybatis生成主键的顺序，如果要在insert into 数据前获得主键，配置为 BEFORE，否则配置为 AFTER 默认值为 BEFORE
