@@ -2,6 +2,7 @@ package com.reger.datasource.core;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -32,8 +33,8 @@ public class DynamicDataSource extends AbstractDataSource {
 	private String dataSourceName;
 	private DruidDataSource masterDataSource;
 	private Map<String, DruidDataSource> slaveDataSources = new LinkedHashMap<String, DruidDataSource>();
-	private List<String> slavesDataSourceNames = new LinkedList<>();
-	private List<String> slavesFailureDataSourceNames = new LinkedList<>();
+	private List<String> slavesDataSourceNames = new ArrayList<>();
+	private List<String> slavesFailureDataSourceNames = new ArrayList<>();
 	private static final ThreadLocal<Stack<Boolean>> ismaster = new ThreadLocal<Stack<Boolean>>() {
 		protected Stack<Boolean> initialValue() {
 			return new Stack<Boolean>();
@@ -157,11 +158,14 @@ public class DynamicDataSource extends AbstractDataSource {
 		if (ismaster.get().isEmpty() || ismaster.get().peek()) {
 			return null;
 		}
-		if (slavesDataSourceNames != null) {
-			String slavesDataSourceName = slavesDataSourceNames.get(selectnum);
-			selectnum = (++selectnum % (slavesDataSourceNames.size()));
+		if (!slavesDataSourceNames.isEmpty()) {
+			int slaveCount=slavesDataSourceNames.size();
+			String slavesDataSourceName = slavesDataSourceNames.get(selectnum% slaveCount);
+			selectnum = (++selectnum % slaveCount);
 			logger.debug("切换到从库{}中查询", slavesDataSourceName);
 			return slavesDataSourceName;
+		}else{
+			logger.info("{}的从库不可用，将使用主库查询",this.dataSourceName);
 		}
 		return null;
 	}
