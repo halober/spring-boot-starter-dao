@@ -55,7 +55,7 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		Configuration configuration = druidConfig.getConfiguration();
 		Map<String, MybatisNodeProperties> druidNodeConfigs = druidConfig.getNodes();
 		if (druidNodeConfigs == null || druidNodeConfigs.isEmpty())
-			throw new RuntimeException("至少需要配置一个DataBase(配置DataBase参数在" + DaoProperties.dbprefix + ".db-node)");
+			throw new RuntimeException("至少需要配置一个DataBase(配置DataBase参数在" + DaoProperties.dbprefix + ".nodes)");
 		this.setPrimary(druidNodeConfigs).forEach((druidNodeName, druidNodeConfig) -> {
 			try {
 				Configuration _configuration;
