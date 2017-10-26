@@ -44,12 +44,12 @@
 
 ### 示例程序
 
-#### 1.克隆[示例程序](https://gitee.com/lei0719/spring-boot-starter-dao-example)，导入eclipse
+#### 1.克隆[示例程序](https://gitee.com/lei0719/spring-boot-starter-dao-example)
 ```cmd
 git clone https://gitee.com/lei0719/spring-boot-starter-dao-example.git
 ``` 
 #### 2.生成dao，model，mapper代码
-修改`generator.properties`中参数，使jdbc参数指向你的数据库。修改表参数，把计划生成的表改为你的数据库中存在。
+导入示例到eclipse,修改`generator.properties`中参数，使jdbc参数指向你的数据库。修改表参数，把计划生成的表改为你的数据库中存在。
 以Application方式启动项目，选择包含main方法的`com.reger.mybatis.generator.GeneratorMain`，运行。
 稍等，如果没有出现异常，基本就生成好了你数据表的数据层。
 
