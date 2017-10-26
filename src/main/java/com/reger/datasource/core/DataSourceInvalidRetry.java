@@ -1,6 +1,8 @@
 package com.reger.datasource.core;
 
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +26,11 @@ public class DataSourceInvalidRetry implements ApplicationContextAware {
 	
 	@Scheduled(initialDelay=10*60*1000,fixedDelay=60*1000) void runTest(){
 		 dataSources = dataSources!=null?dataSources:applicationContext.getBeansOfType(DynamicDataSource.class);
-		 dataSources.forEach((k,d)->d.retryFailureSlavesDataSource());
+		 Iterator<Entry<String, DynamicDataSource>> it = dataSources.entrySet().iterator();
+		 while (it.hasNext()) {
+			Map.Entry< String, DynamicDataSource> entry = (Map.Entry< String, DynamicDataSource>) it.next();
+			entry.getValue().retryFailureSlavesDataSource();
+		}
+		 
 	}
 }

@@ -22,7 +22,7 @@ import com.reger.datasource.properties.DruidStatProperties;
 public class DruidWebStatAutoConfiguration {
 
 	Map<String, String> druidStatParameters(DruidStatProperties druidStatConfig) {
-		Map<String, String> druidStatParameters=new HashMap<>();
+		Map<String, String> druidStatParameters=new HashMap<String, String>();
 		druidStatParameters.put("allow", druidStatConfig.getAllow());
 		druidStatParameters.put("deny", druidStatConfig.getDeny());
 		druidStatParameters.put("resetEnable", ""+druidStatConfig.getResetEnable());

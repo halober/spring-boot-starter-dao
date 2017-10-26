@@ -3,12 +3,12 @@ package com.reger.datasource.core;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.sql.DataSource;
 
@@ -32,9 +32,9 @@ public class DynamicDataSource extends AbstractDataSource {
 	
 	private String dataSourceName;
 	private DruidDataSource masterDataSource;
-	private Map<String, DruidDataSource> slaveDataSources = new LinkedHashMap<String, DruidDataSource>();
-	private List<String> slavesDataSourceNames = new ArrayList<>();
-	private List<String> slavesFailureDataSourceNames = new ArrayList<>();
+	private Map<String, DruidDataSource> slaveDataSources = new ConcurrentHashMap<String, DruidDataSource>();
+	private List<String> slavesDataSourceNames = Collections.synchronizedList(new ArrayList<String>());
+	private List<String> slavesFailureDataSourceNames = Collections.synchronizedList(new ArrayList<String>());
 	private static final ThreadLocal<Stack<Boolean>> ismaster = new ThreadLocal<Stack<Boolean>>() {
 		protected Stack<Boolean> initialValue() {
 			return new Stack<Boolean>();
@@ -144,6 +144,8 @@ public class DynamicDataSource extends AbstractDataSource {
 	}
 
 	protected DataSource determineTargetDataSource(String lookupKey) {
+		if(lookupKey==null)
+			return this.masterDataSource;
 		DataSource dataSource = this.slaveDataSources.get(lookupKey);
 		if (dataSource != null)
 			return dataSource;
@@ -206,25 +208,29 @@ public class DynamicDataSource extends AbstractDataSource {
 	public void init() throws SQLException {
 		logger.debug("初始化 DynamicDataSource {}...",this.dataSourceName);
 		this.masterDataSource.init();
-		this.slaveDataSources.values().forEach(ds->{
+		Iterator<DruidDataSource> it = this.slaveDataSources.values().iterator();
+		while (it.hasNext()) {
+			DruidDataSource druidDataSource = (DruidDataSource) it.next();
 			try {
-				ds.init();
+				druidDataSource.init();
 			} catch (SQLException e) {
-				logger.warn("从库{}初始化失败", ds.getName());
+				logger.warn("从库{}初始化失败", druidDataSource.getName());
 			}
-		});
+		}
 	}
 	
 	public void close() {
 		logger.debug("销毁 DynamicDataSource {}...",this.dataSourceName);
 		this.masterDataSource.close();
-		this.slaveDataSources.values().forEach(ds->{
+		Iterator<DruidDataSource> it = this.slaveDataSources.values().iterator();
+		while (it.hasNext()) {
+			DruidDataSource druidDataSource = (DruidDataSource) it.next();
 			try {
-				ds.close();
+				druidDataSource.close();
 			} catch (Exception e) {
-				logger.warn("关闭从库{}失败", ds.getName());
+				logger.warn("关闭从库{}失败", druidDataSource.getName());
 			}
-		});
+		}
 	}
 	
 	public DruidDataSource masterDataSource() {

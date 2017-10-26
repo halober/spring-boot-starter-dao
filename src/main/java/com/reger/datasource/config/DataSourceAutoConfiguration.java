@@ -1,5 +1,6 @@
 package com.reger.datasource.config;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -56,7 +57,11 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		Map<String, MybatisNodeProperties> druidNodeConfigs = druidConfig.getNodes();
 		if (druidNodeConfigs == null || druidNodeConfigs.isEmpty())
 			throw new RuntimeException("至少需要配置一个DataBase(配置DataBase参数在" + DaoProperties.dbprefix + ".nodes)");
-		this.setPrimary(druidNodeConfigs).forEach((druidNodeName, druidNodeConfig) -> {
+		Iterator<Entry<String, MybatisNodeProperties>> it = this.setPrimary(druidNodeConfigs).entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry< String, MybatisNodeProperties> entry = (Map.Entry< String, MybatisNodeProperties>) it.next();
+			String druidNodeName = entry.getKey();
+			MybatisNodeProperties druidNodeConfig = entry.getValue();
 			try {
 				Configuration _configuration;
 				if(configuration==null)
@@ -67,7 +72,7 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 			} catch (Throwable e) {
 				throw new RuntimeException(e);
 			}
-		});
+		}
 	}
 
 	private Map<String, MybatisNodeProperties> setPrimary(Map<String, MybatisNodeProperties> druidNodeConfigs) {

@@ -22,25 +22,25 @@ public class GlobalEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E>
 	private final Logger logger = LoggerFactory.getLogger("mybatis.EnumTypeHandler");
 	
 	private final Class<E> type;
-	private final static Set<String> defSET = new HashSet<>(Arrays.asList("name", "ordinal"));
+	private final static Set<String> defSET = new HashSet<String>(Arrays.asList("name", "ordinal"));
 	
 	private final static String defNull="DEF.FIELD.NULL.ENUM";
 	/**
 	 * 缓存枚举与值得对应
 	 */
-	private final Map<E, Object> mapEnum = new ConcurrentHashMap<>();
+	private final Map<E, Object> mapEnum = new ConcurrentHashMap<E, Object>();
 	/**
 	 * 保存值于枚举的对应
 	 */
-	private final Map<Object, E> enumMap = new ConcurrentHashMap<>();
+	private final Map<Object, E> enumMap = new ConcurrentHashMap<Object, E>();
 	/**
 	 * 缓存值转字符串与枚举的对应
 	 */
-	private final Map<String, E> strEnumMap = new ConcurrentHashMap<>();
+	private final Map<String, E> strEnumMap = new ConcurrentHashMap<String, E>();
 	/**
 	 * 缓存枚举名字与枚举的对应
 	 */
-	private final Map<String, E> nameEnumMap = new ConcurrentHashMap<>();
+	private final Map<String, E> nameEnumMap = new ConcurrentHashMap<String, E>();
 
 	public GlobalEnumTypeHandler(Class<E> type) {
 		if (type == null) {
@@ -102,18 +102,26 @@ public class GlobalEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E>
 		String fieldName = handler.field();
 		try {
 			field = type.getDeclaredField(fieldName);
-		} catch (NoSuchFieldException | SecurityException e) {
-			if (defSET.contains(fieldName)) {
-				try {
-					field = Enum.class.getDeclaredField(fieldName);
-				} catch (NoSuchFieldException | SecurityException e1) {
-					logger.warn("加载枚举{}信息失败", type.getName(), e);
-				}
-			} else {
-				logger.warn("加载枚举{}信息失败", type.getName(), e);
-			}
+		} catch (NoSuchFieldException e) {
+			field = this.outException(fieldName, e);
+		}catch (SecurityException e) {
+			field = this.outException(fieldName, e);
 		}
 		return field;
+	}
+	private Field outException(String fieldName,Exception e) {
+		if (defSET.contains(fieldName)) {
+			try {
+				return Enum.class.getDeclaredField(fieldName);
+			} catch (NoSuchFieldException e1) {
+				logger.warn("加载枚举{}信息失败", type.getName(), e);
+			}catch ( SecurityException e1) {
+				logger.warn("加载枚举{}信息失败", type.getName(), e);
+			}
+		} else {
+			logger.warn("加载枚举{}信息失败", type.getName(), e);
+		}
+		return null;
 	}
 	
 	/**
@@ -148,7 +156,9 @@ public class GlobalEnumTypeHandler<E extends Enum<E>> extends BaseTypeHandler<E>
 	private Object getField(Field field, E _enum) {
 		try {
 			return field.get(_enum);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+		} catch (IllegalArgumentException e) {
+			logger.warn("取枚举{}.{}的field:{}失败", type.getName(), _enum, field.getName(), e);
+		} catch (IllegalAccessException e) {
 			logger.warn("取枚举{}.{}的field:{}失败", type.getName(), _enum, field.getName(), e);
 		}
 		return _enum.name();

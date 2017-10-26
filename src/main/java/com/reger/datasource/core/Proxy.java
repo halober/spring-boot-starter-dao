@@ -21,7 +21,6 @@ public abstract class Proxy {
 		}
 	}
 
-	@FunctionalInterface
 	public static interface SwitchExecute<T> {
 		T run() throws Throwable;
 	}
