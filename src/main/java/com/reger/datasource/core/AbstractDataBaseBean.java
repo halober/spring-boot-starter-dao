@@ -31,13 +31,15 @@ import com.reger.datasource.properties.MybatisNodeProperties;
 
 import tk.mybatis.spring.mapper.MapperScannerConfigurer;
 
-public abstract class AbstractDataBaseBean{
+public abstract class AbstractDataBaseBean {
 
 	static Logger log = LoggerFactory.getLogger(AbstractDataBaseBean.class);
 
-	public final  AbstractBeanDefinition createDataSource(MybatisNodeProperties druidNodeConfig,DruidProperties defaultConfig ,String dataSourceName) {
-		Assert.notNull(druidNodeConfig,String.format("DynamicDataSource 未初始化 ,dataSourceName=%s,失败原因: 配置参数为空,你的配置可能存在问题!", dataSourceName+""));
-		BeanDefinitionBuilder definitionBuilder= BeanDefinitionBuilder.genericBeanDefinition(DynamicDataSource.class);
+	protected final AbstractBeanDefinition createDataSource(MybatisNodeProperties druidNodeConfig,
+			DruidProperties defaultConfig, String dataSourceName) {
+		Assert.notNull(druidNodeConfig, String
+				.format("DynamicDataSource 未初始化 ,dataSourceName=%s,失败原因: 配置参数为空,你的配置可能存在问题!", dataSourceName + ""));
+		BeanDefinitionBuilder definitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(DynamicDataSource.class);
 		definitionBuilder.addConstructorArgValue(druidNodeConfig);
 		definitionBuilder.addConstructorArgValue(defaultConfig);
 		definitionBuilder.addConstructorArgValue(dataSourceName);
@@ -46,109 +48,115 @@ public abstract class AbstractDataBaseBean{
 		return definitionBuilder.getRawBeanDefinition();
 	}
 
-	public AbstractBeanDefinition createDataSourceMaster(String dataSourceName) {
-		return BeanDefinitionBuilder.
-			genericBeanDefinition(DynamicDataSource.class)
-			.setFactoryMethodOnBean("masterDataSource", dataSourceName)
-			.getRawBeanDefinition();
+	protected AbstractBeanDefinition createDataSourceMaster(String dataSourceName) {
+		return BeanDefinitionBuilder
+				.genericBeanDefinition(DynamicDataSource.class)
+				.setFactoryMethodOnBean("masterDataSource", dataSourceName)
+				.getRawBeanDefinition();
 	}
-	
-	public final  AbstractBeanDefinition createTransactionManager(String dataSourceName) {
+
+	protected final AbstractBeanDefinition createTransactionManager(String dataSourceName) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.genericBeanDefinition(DataSourceTransactionManager.class);
 		bdb.addConstructorArgReference(dataSourceName);
-		return bdb.getRawBeanDefinition(); 
+		return bdb.getRawBeanDefinition();
 	}
-	
-	public final  AbstractBeanDefinition createJdbcTemplate(String dataSourceName) {
+
+	protected final AbstractBeanDefinition createJdbcTemplate(String dataSourceName) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.genericBeanDefinition(JdbcTemplate.class);
 		bdb.addConstructorArgReference(dataSourceName);
-		return bdb.getRawBeanDefinition(); 
+		return bdb.getRawBeanDefinition();
 	}
-	 
-	private final Configuration configuration(Configuration configuration){
+
+	private final Configuration configuration(Configuration configuration) {
 		configuration.getTypeHandlerRegistry().setDefaultEnumTypeHandler(GlobalEnumTypeHandler.class);
 		return configuration;
 	}
-	
+
 	protected String getDbType(DruidProperties nodeProperties, DruidProperties defaultProperties) {
-		String rawUrl=nodeProperties.getUrl();
-		if(StringUtils.isEmpty(nodeProperties.getUrl())){
-			rawUrl=defaultProperties.getUrl();
+		String rawUrl = nodeProperties.getUrl();
+		if (StringUtils.isEmpty(nodeProperties.getUrl())) {
+			rawUrl = defaultProperties.getUrl();
 		}
-		return JdbcUtils.getDbType(rawUrl,null);
+		return JdbcUtils.getDbType(rawUrl, null);
 	}
+
 	private volatile static Interceptor[] interceptors;
-	public final AbstractBeanDefinition createSqlSessionFactoryBean(String dataSourceName,String mapperPackage,String typeAliasesPackage,Dialect dialect, Configuration configuration) {
+
+	protected final AbstractBeanDefinition createSqlSessionFactoryBean(String dataSourceName, String mapperPackage,
+			String typeAliasesPackage, Dialect dialect, Configuration configuration) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(SqlSessionFactoryBean.class);
 		bdb.addPropertyValue("configuration", this.configuration(configuration));
-		bdb.addPropertyValue("failFast", true); 
+		bdb.addPropertyValue("failFast", true);
 		bdb.addPropertyValue("typeAliases", this.saenTypeAliases(typeAliasesPackage));
 		bdb.addPropertyReference("dataSource", dataSourceName);
-		if(interceptors==null){
-			interceptors= new Interceptor[]{new CustomPageInterceptor(dialect)};
-			bdb.addPropertyValue("plugins",interceptors);
-		}else{
-			interceptors= new Interceptor[]{new CustomPageInterceptor(dialect)};
+		if (interceptors == null) {
+			interceptors = new Interceptor[] { new CustomPageInterceptor(dialect) };
+			bdb.addPropertyValue("plugins", interceptors);
+		} else {
+			interceptors = new Interceptor[] { new CustomPageInterceptor(dialect) };
 		}
-		if(!StringUtils.isEmpty(mapperPackage)){
+		if (!StringUtils.isEmpty(mapperPackage)) {
 			try {
-				mapperPackage=new StandardEnvironment().resolveRequiredPlaceholders(mapperPackage);
+				mapperPackage = new StandardEnvironment().resolveRequiredPlaceholders(mapperPackage);
 				String mapperPackages = ClassUtils.convertClassNameToResourcePath(mapperPackage);
-				String mapperPackagePath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX+ mapperPackages + "/*.xml";
+				String mapperPackagePath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + mapperPackages + "/*.xml";
 				Resource[] resources = new PathMatchingResourcePatternResolver().getResources(mapperPackagePath);
 				bdb.addPropertyValue("mapperLocations", resources);
 			} catch (Exception e) {
-				log.error("初始化失败",e);
-				throw new RuntimeException(String.format("SqlSessionFactory 初始化失败  mapperPackage=%s",mapperPackage+""));
+				log.error("初始化失败", e);
+				throw new RuntimeException(
+						String.format("SqlSessionFactory 初始化失败  mapperPackage=%s", mapperPackage + ""));
 			}
 		}
 		return bdb.getBeanDefinition();
-	}	
-	
-	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";  
-    private static final String SEPERATOR = ","; 
-    private Class<?>[] saenTypeAliases(String typeAliasesPackage) {
-    	if(typeAliasesPackage==null||typeAliasesPackage.trim().isEmpty()){
-    		return new Class<?>[]{};
-    	}
-		ResourcePatternResolver resolver =  new PathMatchingResourcePatternResolver();  
-	    MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resolver);  
-	    
-	    String[] aliasList = typeAliasesPackage.split(SEPERATOR); 
-	    List<Class<?>> result = new ArrayList<Class<?>>();  
-	    for(String alias:aliasList){
-	    	if(alias==null||(alias=alias.trim()).isEmpty())
-	    		continue;
-	    	String aliasesPackages = ClassUtils.convertClassNameToResourcePath(alias);
-	    	alias = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + aliasesPackages + "/" + DEFAULT_RESOURCE_PATTERN;  
-	        try {
-	            Resource[] resources =  resolver.getResources(alias);  
-	            if(resources != null && resources.length > 0){  
-	                MetadataReader metadataReader = null;  
-	                for(Resource resource : resources){  
-	                    if(resource.isReadable()){  
-	                       metadataReader =  metadataReaderFactory.getMetadataReader(resource);  
-	                        try {  
-	                            result.add(Class.forName(metadataReader.getClassMetadata().getClassName()));  
-	                        } catch (ClassNotFoundException e) {  
-	                            e.printStackTrace();  
-	                        }  
-	                    }  
-	                }  
-	            }  
-	        } catch (IOException e) {  
-	            e.printStackTrace();  
-	        } 
-	    }
-	    return result.toArray(new Class<?>[0]);
 	}
-    
-	public final AbstractBeanDefinition createScannerConfigurerBean(String sqlSessionFactoryName,String basepackage,Mapper mappers,Order order){
+
+	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
+	private static final String SEPERATOR = ",";
+
+	private Class<?>[] saenTypeAliases(String typeAliasesPackage) {
+		if (typeAliasesPackage == null || typeAliasesPackage.trim().isEmpty()) {
+			return new Class<?>[] {};
+		}
+		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resolver);
+
+		String[] aliasList = typeAliasesPackage.split(SEPERATOR);
+		List<Class<?>> result = new ArrayList<Class<?>>();
+		for (String alias : aliasList) {
+			if (alias == null || (alias = alias.trim()).isEmpty())
+				continue;
+			String aliasesPackages = ClassUtils.convertClassNameToResourcePath(alias);
+			alias = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + aliasesPackages + "/" + DEFAULT_RESOURCE_PATTERN;
+			try {
+				Resource[] resources = resolver.getResources(alias);
+				if (resources != null && resources.length > 0) {
+					MetadataReader metadataReader = null;
+					for (Resource resource : resources) {
+						if (resource.isReadable()) {
+							metadataReader = metadataReaderFactory.getMetadataReader(resource);
+							try {
+								result.add(Class.forName(metadataReader.getClassMetadata().getClassName()));
+							} catch (ClassNotFoundException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return result.toArray(new Class<?>[0]);
+	}
+
+	protected final AbstractBeanDefinition createScannerConfigurerBean(String sqlSessionFactoryName, String basepackage,
+			Mapper mappers, Order order) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.genericBeanDefinition(MapperScannerConfigurer.class);
-		Properties properties=new Properties();
+		Properties properties = new Properties();
 		properties.setProperty("notEmpty", "true");
-		properties.setProperty("ORDER",  order!=null ?order.order:Order.BEFORE.order);
-		properties.setProperty("mappers",mappers!=null?mappers.mapper: Mapper.DEFAULT.mapper);
+		properties.setProperty("ORDER", order != null ? order.order : Order.BEFORE.order);
+		properties.setProperty("mappers", mappers != null ? mappers.mapper : Mapper.DEFAULT.mapper);
 		bdb.addPropertyValue("properties", properties);
 		bdb.addPropertyValue("sqlSessionFactoryBeanName", sqlSessionFactoryName);
 		bdb.addPropertyValue("basePackage", basepackage);
