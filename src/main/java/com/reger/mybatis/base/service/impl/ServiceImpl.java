@@ -180,11 +180,11 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 
 	/**
 	 * 查询实现
-	 * 
-	 * @param pageno
-	 * @param pagesize
+	 * @param pageNo
+	 * @param pageSize
 	 * @param ti
-	 * @return 输出对象
+	 * @param opsUser
+	 * @return
 	 */
 	protected Page<T> searchProcess(int pageNo, int pageSize,  TS ti, OpsUser opsUser) {
 		Assert.notNull(mapper, "没有正确注入mapper层");

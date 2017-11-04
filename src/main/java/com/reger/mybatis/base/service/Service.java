@@ -59,8 +59,8 @@ public interface Service<OpsUser, T, TI extends T,TU extends T, TO extends T,TS 
 
 	/**
 	 * 搜索对象
-	 * @param pageno
-	 * @param pagesize
+	 * @param pageNo
+	 * @param pageSize
 	 * @param search
 	 * @param opsUser
 	 * @return
