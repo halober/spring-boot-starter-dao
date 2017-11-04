@@ -189,6 +189,21 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+		
+		<dependency>
+			<groupId>com.gitee.reger</groupId>
+			<artifactId>spring-boot-starter-swagger</artifactId>
+			<version>1.0.3</version>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.gitee.reger</groupId>
+			<artifactId>spring-boot-starter-webcore</artifactId>
+			<version>1.0.0</version>
+			<optional>true</optional>
+		</dependency>
+		
 	</dependencies>
 
 	<organization>
