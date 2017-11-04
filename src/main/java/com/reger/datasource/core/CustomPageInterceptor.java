@@ -1,7 +1,9 @@
 package com.reger.datasource.core;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.sql.DataSource;
@@ -33,7 +35,7 @@ public class CustomPageInterceptor implements Interceptor {
 	
 	private static final Logger log = LoggerFactory.getLogger(CustomPageInterceptor.class);
 
-	private static final Map<Object, PageInterceptor> pageHelpers = new HashMap<Object, PageInterceptor>();
+	private static final Map<Dialect, PageInterceptor> pageHelpers = new HashMap<Dialect, PageInterceptor>();
 	
 	static{
 		pageHelpers.put(Dialect.H2, new PageInterceptor());
@@ -50,6 +52,15 @@ public class CustomPageInterceptor implements Interceptor {
 		pageHelpers.put(Dialect.PostgreSQL, new PageInterceptor());
 		pageHelpers.put(Dialect.SqlServer2012, new PageInterceptor());
 		pageHelpers.put(Dialect.other, new PageInterceptor());
+		Iterator<Entry<Dialect, PageInterceptor>> it = pageHelpers.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<Dialect, PageInterceptor> entry = (Entry<Dialect, PageInterceptor>) it.next();
+			Properties properties=new Properties();
+			if(entry.getKey()!=Dialect.other){
+				properties.setProperty("helperDialect", entry.getKey().name());
+			}
+			entry.getValue().setProperties(properties);
+		}
 	}
 
 	private final Interceptor pageHelper ;
@@ -74,16 +85,16 @@ public class CustomPageInterceptor implements Interceptor {
 			if(dataSource instanceof DynamicDataSource){
 				Dialect dialect= ((DynamicDataSource)dataSource).getDialect();
 				if(pageHelpers.containsKey(dialect)){
-					log.info("PageHelper 将使用{}的....",dialect);
+					log.debug("PageHelper 将使用{}的....",dialect);
 					return pageHelpers.get(dialect).intercept(invocation);
 				}else{
-					log.info("PageHelper 将使用默认的({})的....",this.dialect);
+					log.debug("PageHelper 将使用默认的({})的....",this.dialect);
 				}
 			}else{
-				log.info("PageHelper 将使用默认的({})的....",this.dialect);
+				log.debug("PageHelper 将使用默认的({})的....",this.dialect);
 			}
 		}else{
-			log.info("PageHelper 将使用默认的({})的....",this.dialect);
+			log.debug("PageHelper 将使用默认的({})的....",this.dialect);
 		}
 		return pageHelper.intercept(invocation);
 	}
