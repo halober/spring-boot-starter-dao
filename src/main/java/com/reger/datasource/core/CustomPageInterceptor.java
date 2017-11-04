@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.sql.DataSource;
+
 import org.apache.ibatis.cache.CacheKey;
 import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.mapping.BoundSql;
@@ -11,9 +13,13 @@ import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.plugin.Interceptor;
 import org.apache.ibatis.plugin.Intercepts;
 import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
 import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.pagehelper.PageInterceptor;
 
@@ -24,6 +30,8 @@ import com.github.pagehelper.PageInterceptor;
     }
 )
 public class CustomPageInterceptor implements Interceptor {
+	
+	private static final Logger log = LoggerFactory.getLogger(CustomPageInterceptor.class);
 
 	private static final Map<Object, PageInterceptor> pageHelpers = new HashMap<Object, PageInterceptor>();
 	
@@ -45,24 +53,48 @@ public class CustomPageInterceptor implements Interceptor {
 	}
 
 	private final Interceptor pageHelper ;
-
+	private final Dialect dialect;
 	public CustomPageInterceptor(Dialect dialect) {
-		pageHelper=pageHelpers.get(dialect);
+		this.dialect=dialect;
+		this.pageHelper=pageHelpers.get(dialect);
 		Properties properties=new Properties();
 //		if(dialect!=Dialect.other){
 //			properties.setProperty("dialect", dialect.name().toLowerCase());
 //		}
-		pageHelper.setProperties(properties);
+		this.pageHelper.setProperties(properties);
 	}
 
 	@Override
 	public Object intercept(Invocation invocation) throws Throwable {
+		Object object=invocation.getArgs()[0];
+		if(object instanceof MappedStatement){
+			MappedStatement  statement=(MappedStatement) object;
+			Configuration config = statement.getConfiguration();
+			DataSource dataSource= config.getEnvironment().getDataSource();
+			if(dataSource instanceof DynamicDataSource){
+				Dialect dialect= ((DynamicDataSource)dataSource).getDialect();
+				if(pageHelpers.containsKey(dialect)){
+					log.info("PageHelper 将使用{}的....",dialect);
+					return pageHelpers.get(dialect).intercept(invocation);
+				}else{
+					log.info("PageHelper 将使用默认的({})的....",this.dialect);
+				}
+			}else{
+				log.info("PageHelper 将使用默认的({})的....",this.dialect);
+			}
+		}else{
+			log.info("PageHelper 将使用默认的({})的....",this.dialect);
+		}
 		return pageHelper.intercept(invocation);
 	}
 
 	@Override
-	public Object plugin(Object target) {
-		return pageHelper.plugin(target);
+	public Object plugin(Object target) {  
+		if (target instanceof Executor) {
+	        return Plugin.wrap(target, this);
+	    } else {
+	        return target;
+	    }
 	}
 
 	@Override

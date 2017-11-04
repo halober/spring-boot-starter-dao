@@ -18,6 +18,7 @@ import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.scheduling.annotation.Async;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.util.JdbcUtils;
 import com.reger.datasource.properties.DruidProperties;
 import com.reger.datasource.properties.MybatisNodeProperties;
 
@@ -30,18 +31,18 @@ public class DynamicDataSource extends AbstractDataSource {
 
 	private static final Logger logger = LoggerFactory.getLogger(DynamicDataSource.class);
 	
-	private String dataSourceName;
-	private DruidDataSource masterDataSource;
-	private Map<String, DruidDataSource> slaveDataSources = new ConcurrentHashMap<String, DruidDataSource>();
-	private List<String> slavesDataSourceNames = Collections.synchronizedList(new ArrayList<String>());
-	private List<String> slavesFailureDataSourceNames = Collections.synchronizedList(new ArrayList<String>());
+	private final Dialect dialect;
+	private volatile int selectnum = 0;
+	private final String dataSourceName;
+	private final DruidDataSource masterDataSource;
+	private final Map<String, DruidDataSource> slaveDataSources = new ConcurrentHashMap<String, DruidDataSource>();
+	private final List<String> slavesDataSourceNames = Collections.synchronizedList(new ArrayList<String>());
+	private final List<String> slavesFailureDataSourceNames = Collections.synchronizedList(new ArrayList<String>());
 	private static final ThreadLocal<Stack<Boolean>> ismaster = new ThreadLocal<Stack<Boolean>>() {
 		protected Stack<Boolean> initialValue() {
 			return new Stack<Boolean>();
 		}
 	};
- 
-	private volatile int selectnum = 0;
 
 	protected static void useMaster() {
 		ismaster.get().push(true);
@@ -176,9 +177,6 @@ public class DynamicDataSource extends AbstractDataSource {
 		return new DynamicDataSource(druidNode, defaultDruidProperties, dataSourceName);
 	}
 
-	public DynamicDataSource() {
-	}
-
 	public DynamicDataSource(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties, String dataSourceName) throws SQLException {
 		this.dataSourceName=dataSourceName;
 		DruidProperties master = druidNode.getMaster();
@@ -201,6 +199,9 @@ public class DynamicDataSource extends AbstractDataSource {
 				this.slaveDataSources.put(slaveDatasourceName, datasourc);
 			}
 		}
+		String rawUrl=master.getUrl();
+		String dbType = JdbcUtils.getDbType(rawUrl,null);
+		this.dialect=Dialect.valoueOfName(dbType);
 	}
 	
 	public void init() throws SQLException {
@@ -233,5 +234,9 @@ public class DynamicDataSource extends AbstractDataSource {
 	
 	public DruidDataSource masterDataSource() {
 		return masterDataSource;
+	}
+	 
+	public Dialect getDialect() {
+		return dialect;
 	}
 }
