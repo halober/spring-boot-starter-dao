@@ -172,16 +172,14 @@ public class DynamicDataSource extends AbstractDataSource {
 		return null;
 	}
 
-	public static DynamicDataSource create(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties,
-			String dataSourceName) throws SQLException {
+	public static DynamicDataSource create(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties, String dataSourceName) throws SQLException {
 		return new DynamicDataSource(druidNode, defaultDruidProperties, dataSourceName);
 	}
 
 	public DynamicDataSource() {
 	}
 
-	public DynamicDataSource(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties, String dataSourceName)
-			throws SQLException {
+	public DynamicDataSource(MybatisNodeProperties druidNode, DruidProperties defaultDruidProperties, String dataSourceName) throws SQLException {
 		this.dataSourceName=dataSourceName;
 		DruidProperties master = druidNode.getMaster();
 		if (master == null)

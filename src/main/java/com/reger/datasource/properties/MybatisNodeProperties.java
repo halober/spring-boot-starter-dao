@@ -2,6 +2,7 @@ package com.reger.datasource.properties;
 
 import java.util.List;
 
+import com.reger.datasource.core.Dialect;
 import com.reger.datasource.core.Mapper;
 import com.reger.datasource.core.Order;
 
@@ -24,10 +25,16 @@ public class MybatisNodeProperties {
 	 */
 	private Order order = Order.BEFORE;
 	/**
-	 * mybatis通用mapper使用的mapper接口集合,mysqldb时使用使用 MYSQL,SqlServer 时使用MSSQL,其它db类型时使用DEFAULT，
-	 * <br> 默认值是 DEFAULT
+	 * mybatis通用mapper使用的mapper接口集合,mysqldb时使用使用 MYSQL,SqlServer 时使用MSSQL,其它db类型时使用DEFAULT，可以根据dialect自动判断
+	 * <br> 默认值是 null
 	 */
-	private Mapper mapper = Mapper.DEFAULT;
+	@Deprecated
+	private Mapper mapper = null;
+	
+	/**
+	 * 数据库方言，默认值为空,如果为空可以根据数据库链接字符串判断
+	 */
+	private Dialect dialect=null;
 	/**
 	 * 是否是默认的DB对象， 
 	 * </br默认值  false，
@@ -107,4 +114,13 @@ public class MybatisNodeProperties {
 	public void setMapper(Mapper mapper) {
 		this.mapper = mapper;
 	}
+
+	public Dialect getDialect() {
+		return dialect;
+	}
+
+	public void setDialect(Dialect dialect) {
+		this.dialect = dialect;
+	}
+	
 }

@@ -25,6 +25,7 @@ import org.springframework.util.StringUtils;
 import com.reger.datasource.aspect.DataSourceAspect;
 import com.reger.datasource.core.AbstractDataBaseBean;
 import com.reger.datasource.core.DataSourceInvalidRetry;
+import com.reger.datasource.core.Dialect;
 import com.reger.datasource.core.Mapper;
 import com.reger.datasource.core.Order;
 import com.reger.datasource.properties.DaoProperties;
@@ -110,13 +111,32 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 	}
 
 
-	private void registryBean(String druidNodeName, MybatisNodeProperties nodeProperties, DruidProperties druidProperties, Configuration configuration, BeanDefinitionRegistry registry) {
+	private void registryBean(String druidNodeName, MybatisNodeProperties nodeProperties, DruidProperties defaultProperties, Configuration configuration, BeanDefinitionRegistry registry) {
 		if (nodeProperties == null)
 			return;
 		String mapperPackage = nodeProperties.getMapperPackage();
 		String typeAliasesPackage=nodeProperties.getTypeAliasesPackage();
+		String dbType=super.getDbType(nodeProperties.getMaster(), defaultProperties);
 		Order order = nodeProperties.getOrder();
+		Dialect dialect = nodeProperties.getDialect();
+		if(null==dialect){
+			dialect=Dialect.valoueOfName(dbType);
+		}
 		Mapper mappers = nodeProperties.getMapper();
+		if(null ==mappers){
+			switch (dialect) {
+			case Mysql:
+				mappers=Mapper.MYSQL;
+				break;
+			case SqlServer:
+			case SqlServer2012:
+				mappers=Mapper.MYSQL;
+				break;
+			default:
+				mappers=Mapper.DEFAULT;
+				break;
+			}
+		}
 		String basepackage = nodeProperties.getBasePackage();
 		if (StringUtils.isEmpty(basepackage)) {
 			log.warn("BasePackage为空，db配置异常,当前配置数据源对象的名字{}", druidNodeName);
@@ -130,12 +150,12 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		String sqlSessionFactoryBeanName = druidNodeName + "RegerSqlSessionFactoryBean";
 		String scannerConfigurerName = druidNodeName + "RegerScannerConfigurer";
 
-		AbstractBeanDefinition dataSource = super.createDataSource(nodeProperties, druidProperties, dataSourceName);
+		AbstractBeanDefinition dataSource = super.createDataSource(nodeProperties, defaultProperties, dataSourceName);
 		AbstractBeanDefinition dataSourceMaster = super.createDataSourceMaster(dataSourceName);
 		AbstractBeanDefinition jdbcTemplate = super.createJdbcTemplate(dataSourceName);
 		AbstractBeanDefinition transactionManager = super.createTransactionManager(dataSourceMasterName);
 
-		AbstractBeanDefinition sqlSessionFactoryBean = super.createSqlSessionFactoryBean(dataSourceName, mapperPackage, typeAliasesPackage, configuration);
+		AbstractBeanDefinition sqlSessionFactoryBean = super.createSqlSessionFactoryBean(dataSourceName, mapperPackage, typeAliasesPackage, dialect, configuration);
 		AbstractBeanDefinition scannerConfigurer = super.createScannerConfigurerBean(sqlSessionFactoryBeanName, basepackage,mappers, order);
 
 		dataSource.setLazyInit(true);

@@ -25,9 +25,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
-import com.github.pagehelper.PageInterceptor;
-import com.reger.datasource.properties.MybatisNodeProperties;
+import com.alibaba.druid.util.JdbcUtils;
 import com.reger.datasource.properties.DruidProperties;
+import com.reger.datasource.properties.MybatisNodeProperties;
 
 import tk.mybatis.spring.mapper.MapperScannerConfigurer;
 
@@ -70,39 +70,57 @@ public abstract class AbstractDataBaseBean{
 		return configuration;
 	}
 	
-	public final AbstractBeanDefinition createSqlSessionFactoryBean(String dataSourceName,String mapperPackage,String typeAliasesPackage,Configuration configuration) {
+	protected String getDbType(DruidProperties nodeProperties, DruidProperties defaultProperties) {
+		String rawUrl=nodeProperties.getUrl();
+		if(StringUtils.isEmpty(nodeProperties.getUrl())){
+			rawUrl=defaultProperties.getUrl();
+		}
+		return JdbcUtils.getDbType(rawUrl,null);
+	}
+	private volatile static Interceptor[] interceptors;
+	public final AbstractBeanDefinition createSqlSessionFactoryBean(String dataSourceName,String mapperPackage,String typeAliasesPackage,Dialect dialect, Configuration configuration) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(SqlSessionFactoryBean.class);
 		bdb.addPropertyValue("configuration", this.configuration(configuration));
 		bdb.addPropertyValue("failFast", true); 
 		bdb.addPropertyValue("typeAliases", this.saenTypeAliases(typeAliasesPackage));
 		bdb.addPropertyReference("dataSource", dataSourceName);
-		PageInterceptor pageInterceptor=new PageInterceptor();
-		Properties p=new Properties();
-		pageInterceptor.setProperties(p);
-		bdb.addPropertyValue("plugins", new Interceptor[]{pageInterceptor});
-		if(!StringUtils.isEmpty(mapperPackage))
+		if(interceptors==null){
+			interceptors= new Interceptor[]{new CustomPageInterceptor(dialect)};
+			bdb.addPropertyValue("plugins",interceptors);
+		}else{
+			interceptors= new Interceptor[]{new CustomPageInterceptor(dialect)};
+		}
+		if(!StringUtils.isEmpty(mapperPackage)){
 			try {
-				String mapperPackagePath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX+ ClassUtils.convertClassNameToResourcePath(new StandardEnvironment().resolveRequiredPlaceholders(mapperPackage)) + "/*.xml";
-				bdb.addPropertyValue("mapperLocations", new PathMatchingResourcePatternResolver().getResources(mapperPackagePath));
+				mapperPackage=new StandardEnvironment().resolveRequiredPlaceholders(mapperPackage);
+				String mapperPackages = ClassUtils.convertClassNameToResourcePath(mapperPackage);
+				String mapperPackagePath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX+ mapperPackages + "/*.xml";
+				Resource[] resources = new PathMatchingResourcePatternResolver().getResources(mapperPackagePath);
+				bdb.addPropertyValue("mapperLocations", resources);
 			} catch (Exception e) {
 				log.error("初始化失败",e);
-				Assert.isTrue( false,String.format("SqlSessionFactory 初始化失败  mapperPackage=%s",mapperPackage+""));
+				throw new RuntimeException(String.format("SqlSessionFactory 初始化失败  mapperPackage=%s",mapperPackage+""));
 			}
+		}
 		return bdb.getBeanDefinition();
 	}	
 	
 	private static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";  
     private static final String SEPERATOR = ","; 
     private Class<?>[] saenTypeAliases(String typeAliasesPackage) {
+    	if(typeAliasesPackage==null||typeAliasesPackage.trim().isEmpty()){
+    		return new Class<?>[]{};
+    	}
 		ResourcePatternResolver resolver =  new PathMatchingResourcePatternResolver();  
 	    MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resolver);  
 	    
 	    String[] aliasList = typeAliasesPackage.split(SEPERATOR); 
 	    List<Class<?>> result = new ArrayList<Class<?>>();  
 	    for(String alias:aliasList){
-	    	if(alias==null||alias.isEmpty())
+	    	if(alias==null||(alias=alias.trim()).isEmpty())
 	    		continue;
-	    	alias = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + ClassUtils.convertClassNameToResourcePath(alias) + "/" + DEFAULT_RESOURCE_PATTERN;  
+	    	String aliasesPackages = ClassUtils.convertClassNameToResourcePath(alias);
+	    	alias = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + aliasesPackages + "/" + DEFAULT_RESOURCE_PATTERN;  
 	        try {
 	            Resource[] resources =  resolver.getResources(alias);  
 	            if(resources != null && resources.length > 0){  
