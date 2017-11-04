@@ -9,11 +9,11 @@ public final class PageUtis {
 
 	public static <T, TO> PageInfo<TO> outPage(Page<T> page, List<TO> tos) {
 		if (page == null)
-			return new PageInfo<>();
+			return new PageInfo<TO>();
 		int pageSize = page.getPageSize();
 		int pageNo = page.getPageNum();
 		long total = page.getTotal();
-		return new PageInfo<>(pageNo, pageSize, total, tos);
+		return new PageInfo<TO>(pageNo, pageSize, total, tos);
 	}
 
 	public static <T> PageInfo<T> outPage(Page<T> page) {

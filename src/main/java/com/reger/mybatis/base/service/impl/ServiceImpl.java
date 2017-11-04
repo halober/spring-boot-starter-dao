@@ -1,10 +1,10 @@
 package com.reger.mybatis.base.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,12 +53,13 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	protected List<TO> out(final Collection<T> collection, final OpsUser opsUser) {
 		if(collection==null)
 			return Collections.emptyList();
-		return collection.stream().map(new Function<T, TO>() {
-			@Override
-			public TO apply(T t) {
-				return ServiceImpl.this.out(t, opsUser);
-			}
-		}).collect(Collectors.<TO>toList());
+		Iterator<T> it = collection.iterator();
+		List<TO> tos=new ArrayList<TO>();
+		while (it.hasNext()) {
+			T t = (T) it.next();
+			tos.add(this.out(t, opsUser));
+		}
+		return tos;
 	}
 
 	/**
@@ -69,9 +70,9 @@ public abstract class ServiceImpl<OpsUser, T, TI extends T,TU extends T, TO exte
 	@SuppressWarnings("unchecked")
 	protected PageInfo<TO> outPage(Page<T> page, OpsUser opsUser ) {
 		if (page == null)
-			return new PageInfo<>();
+			return new PageInfo<TO>();
 		@SuppressWarnings("rawtypes")
-		PageInfo  pageInfo= new PageInfo<>(page);
+		PageInfo  pageInfo= new PageInfo<T>(page);
 		pageInfo.setList(this.out(page, opsUser));
 		return pageInfo;
 	}
