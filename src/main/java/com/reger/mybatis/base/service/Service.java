@@ -49,10 +49,10 @@ public interface Service<OpsUser, T, TI extends T,TU extends T, TO extends T,TS 
 	public void del(ID id, OpsUser opsUser) ;
 
 	/**
-	 * 列出一个对象
-	 * 
-	 * @param pageno
-	 * @param pagesize
+	 * 分页列出对象
+	 * @param pageNo
+	 * @param pageSize
+	 * @param opsUser
 	 * @return
 	 */
 	public PageInfo<TO> list(int pageNo, int pageSize, OpsUser opsUser) ;

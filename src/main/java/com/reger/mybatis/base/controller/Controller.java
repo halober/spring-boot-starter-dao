@@ -25,6 +25,7 @@ public abstract class Controller<OpsUser, T, TI extends T, TU extends T, TO exte
 
 	/**
 	 * 初始化一些通用数据
+	 * 
 	 * @param t
 	 */
 	protected void init(T t) {
