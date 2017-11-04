@@ -58,9 +58,9 @@ public class CustomPageInterceptor implements Interceptor {
 		this.dialect=dialect;
 		this.pageHelper=pageHelpers.get(dialect);
 		Properties properties=new Properties();
-//		if(dialect!=Dialect.other){
-//			properties.setProperty("dialect", dialect.name().toLowerCase());
-//		}
+		if(dialect!=Dialect.other){
+			properties.setProperty("helperDialect", dialect.name());
+		}
 		this.pageHelper.setProperties(properties);
 	}
 
