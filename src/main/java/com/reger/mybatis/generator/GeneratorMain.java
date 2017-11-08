@@ -11,8 +11,8 @@ import org.mybatis.generator.config.xml.ConfigurationParser;
 import org.mybatis.generator.internal.DefaultShellCallback;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.util.Assert;
 
-import com.reger.core.utils.Assert;
 
 /**
  * 生成mybatis，model，dao，mapper
