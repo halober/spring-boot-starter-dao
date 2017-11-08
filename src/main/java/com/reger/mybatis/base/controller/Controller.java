@@ -16,11 +16,27 @@ import com.reger.mybatis.base.service.Service;
 
 import io.swagger.annotations.ApiOperation;
 
+/**
+ * 通用控制器，一般处理后台管理类功能时可用，又复杂业务的慎用
+ * @author leige
+ *
+ * @param <OpsUser> 操作用户的类类型
+ * @param <T> 操作原类型
+ * @param <TI> 保存时使用的类型
+ * @param <TU> 更新时使用的类型
+ * @param <TO> 输出时使用的类类型
+ * @param <TS> 搜索输入时使用的类型
+ * @param <ID> 主键的类型
+ */
 public abstract class Controller<OpsUser, T, TI extends T, TU extends T, TO extends T, TS extends T, ID> {
 
 	@Autowired(required = false)
 	protected Service<OpsUser, T, TI, TU, TO, TS, ID> service;
 
+	/**
+	 * 初始化操作用户
+	 * @return
+	 */
 	protected abstract OpsUser getOpsUser();
 
 	/**
