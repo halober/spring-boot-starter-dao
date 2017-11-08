@@ -39,7 +39,7 @@ public class MybatisNodeProperties {
 	 * 是否是默认的DB对象， 
 	 * </br默认值  false，
 	 * </br>最多只有一个为true，
-	 * </br>如果配置多个只有第一个生效
+	 * </br>如果配置多个只有第一个生效,如果一个也不配置通用第一个生效
 	 */
 	private boolean primary;
 	/**

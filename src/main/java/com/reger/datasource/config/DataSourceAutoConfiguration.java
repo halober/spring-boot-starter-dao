@@ -123,19 +123,8 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 			dialect=Dialect.valoueOfName(dbType);
 		}
 		Mapper mappers = nodeProperties.getMapper();
-		if(null ==mappers){
-			switch (dialect) {
-			case Mysql:
-				mappers=Mapper.MYSQL;
-				break;
-			case SqlServer:
-			case SqlServer2012:
-				mappers=Mapper.MYSQL;
-				break;
-			default:
-				mappers=Mapper.DEFAULT;
-				break;
-			}
+		if(mappers==null){
+			mappers=Mapper.valueOfDialect(dialect);
 		}
 		String basepackage = nodeProperties.getBasePackage();
 		if (StringUtils.isEmpty(basepackage)) {

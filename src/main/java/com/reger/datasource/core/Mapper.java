@@ -15,4 +15,15 @@ public enum Mapper {
 	public String toString() {
 		return mapper;
 	}
+	public static final Mapper valueOfDialect(Dialect dialect) {
+		switch (dialect) {
+			case Mysql:
+				return Mapper.MYSQL;
+			case SqlServer:
+			case SqlServer2012:
+				return Mapper.MYSQL;
+			default:
+				return Mapper.DEFAULT;
+		}
+	}
 }
