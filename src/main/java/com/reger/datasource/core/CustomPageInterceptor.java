@@ -86,16 +86,16 @@ public class CustomPageInterceptor implements Interceptor {
 				DynamicDataSource dynamicDataSource=((DynamicDataSource)dataSource); 
 				Dialect dialect= dynamicDataSource.getDialect();
 				if(pageHelpers.containsKey(dialect)){
-					log.debug("PageHelper 将使用{}的....",dialect);
+					log.debug("将使用{}的PageHelper....",dialect);
 					return pageHelpers.get(dialect).intercept(invocation);
 				}else{
-					log.debug("PageHelper 将使用默认的({})的....",this.dialect);
+					log.debug("将使用默认的PageHelper,dialect=({})的....",this.dialect);
 				}
 			}else{
-				log.debug("PageHelper 将使用默认的({})的....",this.dialect);
+				log.debug("将使用默认的PageHelper,dialect=({})的....",this.dialect);
 			}
 		}else{
-			log.debug("PageHelper 将使用默认的({})的....",this.dialect);
+			log.debug("将使用默认的PageHelper,dialect=({})的....",this.dialect);
 		}
 		return pageHelper.intercept(invocation);
 	}
