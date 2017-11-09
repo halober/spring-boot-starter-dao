@@ -236,6 +236,10 @@ public class DynamicDataSource extends AbstractDataSource {
 		return masterDataSource;
 	}
 	 
+	public String getDataSourceName() {
+		return dataSourceName;
+	}
+
 	public Dialect getDialect() {
 		return dialect;
 	}

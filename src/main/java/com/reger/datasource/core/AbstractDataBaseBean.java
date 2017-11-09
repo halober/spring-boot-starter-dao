@@ -67,11 +67,43 @@ public abstract class AbstractDataBaseBean {
 		return bdb.getRawBeanDefinition();
 	}
 
-	private final Configuration configuration(Configuration configuration) {
-		configuration.getTypeHandlerRegistry().setDefaultEnumTypeHandler(GlobalEnumTypeHandler.class);
-		return configuration;
+	protected Configuration cloneConfiguration(Configuration configuration) { 
+		Configuration relust=new Configuration();
+		relust.setEnvironment(configuration.getEnvironment());
+		relust.setSafeRowBoundsEnabled(configuration.isSafeRowBoundsEnabled());
+		relust.setSafeResultHandlerEnabled(configuration.isSafeResultHandlerEnabled());
+		relust.setMapUnderscoreToCamelCase(configuration.isMapUnderscoreToCamelCase());
+		relust.setAggressiveLazyLoading(configuration.isAggressiveLazyLoading());
+		relust.setMultipleResultSetsEnabled(configuration.isMultipleResultSetsEnabled());
+		relust.setUseGeneratedKeys(configuration.isUseGeneratedKeys());
+		relust.setUseColumnLabel(configuration.isUseColumnLabel());
+		relust.setCacheEnabled(configuration.isCacheEnabled());
+		relust.setCallSettersOnNulls(configuration.isCallSettersOnNulls());
+		relust.setUseActualParamName(configuration.isUseActualParamName());
+		relust.setReturnInstanceForEmptyRow(configuration.isReturnInstanceForEmptyRow());
+		relust.setLogPrefix(configuration.getLogPrefix());
+		relust.setLogImpl(configuration.getLogImpl());
+		relust.setVfsImpl(configuration.getVfsImpl());
+		relust.setLocalCacheScope(configuration.getLocalCacheScope());
+		relust.setJdbcTypeForNull(configuration.getJdbcTypeForNull());
+		relust.setLazyLoadTriggerMethods(configuration.getLazyLoadTriggerMethods());
+		relust.setDefaultStatementTimeout(configuration.getDefaultStatementTimeout());
+		relust.setDefaultFetchSize(configuration.getDefaultFetchSize());
+		relust.setDefaultExecutorType(configuration.getDefaultExecutorType());
+		relust.setAutoMappingBehavior(configuration.getAutoMappingBehavior());
+		relust.setAutoMappingUnknownColumnBehavior(configuration.getAutoMappingUnknownColumnBehavior());
+		relust.setVariables(configuration.getVariables());
+		relust.setReflectorFactory(configuration.getReflectorFactory());
+		relust.setObjectFactory(configuration.getObjectFactory());
+		relust.setObjectWrapperFactory(configuration.getObjectWrapperFactory());
+		relust.setLazyLoadingEnabled(configuration.isLazyLoadingEnabled());
+		relust.setProxyFactory(configuration.getProxyFactory());
+		relust.setDatabaseId(configuration.getDatabaseId());
+		relust.setConfigurationFactory(configuration.getConfigurationFactory());
+		relust.getTypeHandlerRegistry().setDefaultEnumTypeHandler(GlobalEnumTypeHandler.class);
+		return relust;
 	}
-
+	
 	protected String getDbType(DruidProperties nodeProperties, DruidProperties defaultProperties) {
 		String rawUrl = nodeProperties.getUrl();
 		if (StringUtils.isEmpty(nodeProperties.getUrl())) {
@@ -79,22 +111,17 @@ public abstract class AbstractDataBaseBean {
 		}
 		return JdbcUtils.getDbType(rawUrl, null);
 	}
-
-	private volatile static Interceptor[] interceptors;
+	
 
 	protected final AbstractBeanDefinition createSqlSessionFactoryBean(String dataSourceName, String mapperPackage,
 			String typeAliasesPackage, Dialect dialect, Configuration configuration) {
+		configuration.setDatabaseId(dataSourceName);
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.rootBeanDefinition(SqlSessionFactoryBean.class);
-		bdb.addPropertyValue("configuration", this.configuration(configuration));
+		bdb.addPropertyValue("configuration", configuration);
 		bdb.addPropertyValue("failFast", true);
 		bdb.addPropertyValue("typeAliases", this.saenTypeAliases(typeAliasesPackage));
 		bdb.addPropertyReference("dataSource", dataSourceName);
-		if (interceptors == null) {
-			interceptors = new Interceptor[] { new CustomPageInterceptor(dialect) };
-			bdb.addPropertyValue("plugins", interceptors);
-		} else {
-			interceptors = new Interceptor[] { new CustomPageInterceptor(dialect) };
-		}
+		bdb.addPropertyValue("plugins", new Interceptor[] { new CustomPageInterceptor(dialect) });
 		if (!StringUtils.isEmpty(mapperPackage)) {
 			try {
 				mapperPackage = new StandardEnvironment().resolveRequiredPlaceholders(mapperPackage);

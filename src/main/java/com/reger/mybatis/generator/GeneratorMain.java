@@ -24,6 +24,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.druid.util.JdbcUtils;
@@ -140,7 +141,13 @@ public class GeneratorMain implements CommandLineRunner, EnvironmentAware {
 			properties.setProperty("package.repo", this.getFirstPackage(node.getBasePackage()));
 		}
 		if (!StringUtils.hasText(properties.getProperty("package.mapper"))) {
-			properties.setProperty("package.mapper", this.getFirstPackage(node.getMapperPackage()));
+			String alias=this.getFirstPackage(node.getMapperPackage());
+			if(StringUtils.hasText(alias)){
+				alias=ClassUtils.convertClassNameToResourcePath(alias);
+			}else{
+				alias="";
+			}
+			properties.setProperty("package.mapper",alias);
 		}
 	}
 

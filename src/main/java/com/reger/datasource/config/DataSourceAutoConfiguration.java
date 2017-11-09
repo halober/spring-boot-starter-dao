@@ -65,10 +65,11 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 			MybatisNodeProperties druidNodeConfig = entry.getValue();
 			try {
 				Configuration _configuration;
-				if(configuration==null)
+				if(configuration==null){
 					_configuration=new Configuration();
-				else
-					_configuration=configuration;
+				}else{
+					_configuration=super.cloneConfiguration(configuration);
+				}
 				this.registryBean(druidNodeName, druidNodeConfig, defaultConfig, _configuration, registry);
 			} catch (Throwable e) {
 				throw new RuntimeException(e);

@@ -83,7 +83,8 @@ public class CustomPageInterceptor implements Interceptor {
 			Configuration config = statement.getConfiguration();
 			DataSource dataSource= config.getEnvironment().getDataSource();
 			if(dataSource instanceof DynamicDataSource){
-				Dialect dialect= ((DynamicDataSource)dataSource).getDialect();
+				DynamicDataSource dynamicDataSource=((DynamicDataSource)dataSource); 
+				Dialect dialect= dynamicDataSource.getDialect();
 				if(pageHelpers.containsKey(dialect)){
 					log.debug("PageHelper 将使用{}的....",dialect);
 					return pageHelpers.get(dialect).intercept(invocation);
