@@ -131,8 +131,7 @@ public abstract class AbstractDataBaseBean {
 				bdb.addPropertyValue("mapperLocations", resources);
 			} catch (Exception e) {
 				log.error("初始化失败", e);
-				throw new RuntimeException(
-						String.format("SqlSessionFactory 初始化失败  mapperPackage=%s", mapperPackage + ""));
+				throw new RuntimeException( String.format("SqlSessionFactory 初始化失败  mapperPackage=%s", mapperPackage + ""));
 			}
 		}
 		return bdb.getBeanDefinition();
