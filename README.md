@@ -15,6 +15,8 @@
 ### 快速入门
 快速入门[点击这里](http://blog.csdn.net/hulei19900322/article/details/78118965)
 
+### 本项目同时在 [开源中国](https://gitee.com/reger/spring-boot-starter-dao),和[github](https://github.com/halober/spring-boot-starter-dao)进行更新，欢迎大家提出意见
+
 ## 交流QQ群： 64409116，有问题或者有建议欢迎加群反馈。
 
 ### 更新记录
