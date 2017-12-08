@@ -172,7 +172,7 @@ public class DruidProperties {
 	 */
 	private Long timeBetweenLogStatsMillis;
 	/**
-	 * </br> 默认值 
+	 * </br> 默认值  28000 ,mysql链接失效时间28800，最好不要超过这个至
 	 */
 	private Integer validationQueryTimeout;
 
@@ -194,6 +194,7 @@ public class DruidProperties {
 		dataSource.setDefaultAutoCommit(defaultAutoCommit);
 		dataSource.setTimeBetweenConnectErrorMillis(timeBetweenConnectErrorMillis);
 		dataSource.setValidationQuery(validationQuery);
+		dataSource.setValidationQueryTimeout(validationQueryTimeout);
 		dataSource.setTestWhileIdle(testWhileIdle);
 		dataSource.setTestOnBorrow(testOnBorrow);
 		dataSource.setTestOnReturn(testOnReturn);
@@ -222,7 +223,6 @@ public class DruidProperties {
 		dataSource.setMaxOpenPreparedStatements(maxOpenPreparedStatements);
 		dataSource.setNotFullTimeoutRetryCount(notFullTimeoutRetryCount);
 		dataSource.setTimeBetweenLogStatsMillis(timeBetweenLogStatsMillis);
-		dataSource.setValidationQueryTimeout(validationQueryTimeout);
 		return dataSource;
 	}
 
@@ -238,6 +238,8 @@ public class DruidProperties {
 		druidProperties.minEvictableIdleTimeMillis=300000L;
 
 		druidProperties.validationQuery = "SELECT 0 ;";
+		druidProperties.validationQueryTimeout = 28000;
+		
 		druidProperties.testWhileIdle = true;
 		druidProperties.testOnBorrow = false;
 		druidProperties.testOnReturn = false;
@@ -270,7 +272,6 @@ public class DruidProperties {
 		druidProperties.maxOpenPreparedStatements = 200;
 		druidProperties.notFullTimeoutRetryCount = 500;
 		druidProperties.timeBetweenLogStatsMillis = 300000L;
-		druidProperties.validationQueryTimeout = 300000;
 		return this.merge(druidProperties);
 	}
 
