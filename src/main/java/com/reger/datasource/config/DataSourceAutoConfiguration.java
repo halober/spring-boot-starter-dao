@@ -32,9 +32,11 @@ import com.reger.datasource.properties.DaoProperties;
 import com.reger.datasource.properties.DruidProperties;
 import com.reger.datasource.properties.MybatisNodeProperties;
 
-@org.springframework.context.annotation.Configuration
-@EnableTransactionManagement(proxyTargetClass=true,order=Ordered.HIGHEST_PRECEDENCE)
-public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
+import tk.mybatis.mapper.code.Style;
+
+@EnableTransactionManagement(proxyTargetClass = true, order = Ordered.HIGHEST_PRECEDENCE)
+public class DataSourceAutoConfiguration extends AbstractDataBaseBean
+		implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
 
 	static Logger log = LoggerFactory.getLogger(DataSourceAutoConfiguration.class);
 
@@ -52,23 +54,24 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 	@Override
 	public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 		DaoProperties druidConfig = this.getDruidConfig(DaoProperties.dbprefix, DaoProperties.class);
-		DruidProperties defaultConfig =  this.getDruidConfig(DruidProperties.druidDefault, DruidProperties.class);
+		DruidProperties defaultConfig = this.getDruidConfig(DruidProperties.druidDefault, DruidProperties.class);
 
 		Configuration configuration = druidConfig.getConfiguration();
 		Map<String, MybatisNodeProperties> druidNodeConfigs = druidConfig.getNodes();
-		if (druidNodeConfigs == null || druidNodeConfigs.isEmpty())
+		if (druidNodeConfigs == null || druidNodeConfigs.isEmpty()) {
 			throw new RuntimeException("至少需要配置一个DataBase(配置DataBase参数在" + DaoProperties.dbprefix + ".nodes)");
+		}
 		Iterator<Entry<String, MybatisNodeProperties>> it = this.setPrimary(druidNodeConfigs).entrySet().iterator();
 		while (it.hasNext()) {
-			Map.Entry< String, MybatisNodeProperties> entry = (Map.Entry< String, MybatisNodeProperties>) it.next();
+			Map.Entry<String, MybatisNodeProperties> entry = (Map.Entry<String, MybatisNodeProperties>) it.next();
 			String druidNodeName = entry.getKey();
 			MybatisNodeProperties druidNodeConfig = entry.getValue();
 			try {
 				Configuration _configuration;
-				if(configuration==null){
-					_configuration=new Configuration();
-				}else{
-					_configuration=super.cloneConfiguration(configuration);
+				if (configuration == null) {
+					_configuration = new Configuration();
+				} else {
+					_configuration = super.cloneConfiguration(configuration);
 				}
 				this.registryBean(druidNodeName, druidNodeConfig, defaultConfig, _configuration, registry);
 			} catch (Throwable e) {
@@ -87,16 +90,17 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 				if (primarys > 1)
 					druidNode.setPrimary(false);
 			}
-			if (druidNode != null && defDruidNode == null)
+			if (druidNode != null && defDruidNode == null) {
 				defDruidNode = druidNode;
+			}
 		}
 		if (primarys == 0 && defDruidNode != null)
 			defDruidNode.setPrimary(true);
 		return druidNodeConfigs;
 	}
 
-	private <T> T getDruidConfig(String prefix,Class<T> claz) {
-		PropertiesConfigurationFactory<T> factory = new PropertiesConfigurationFactory<T>( claz);
+	private <T> T getDruidConfig(String prefix, Class<T> claz) {
+		PropertiesConfigurationFactory<T> factory = new PropertiesConfigurationFactory<T>(claz);
 		factory.setPropertySources(environment.getPropertySources());
 		factory.setConversionService(environment.getConversionService());
 		factory.setIgnoreInvalidFields(false);
@@ -111,48 +115,53 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		}
 	}
 
-
-	private void registryBean(String druidNodeName, MybatisNodeProperties nodeProperties, DruidProperties defaultProperties, Configuration configuration, BeanDefinitionRegistry registry) {
-		if (nodeProperties == null)
+	private void registryBean(String druidNodeName, MybatisNodeProperties nodeProperties,
+			DruidProperties defaultProperties, Configuration configuration, BeanDefinitionRegistry registry) {
+		if (nodeProperties == null) {
 			return;
+		}
 		String mapperPackage = nodeProperties.getMapperPackage();
-		String typeAliasesPackage=nodeProperties.getTypeAliasesPackage();
-		String dbType=super.getDbType(nodeProperties.getMaster(), defaultProperties);
+		String typeAliasesPackage = nodeProperties.getTypeAliasesPackage();
+		String dbType = super.getDbType(nodeProperties.getMaster(), defaultProperties);
 		Order order = nodeProperties.getOrder();
 		Dialect dialect = nodeProperties.getDialect();
-		if(null==dialect){
-			dialect=Dialect.valoueOfName(dbType);
+		Style style = nodeProperties.getStyle();
+		if (null == dialect) {
+			dialect = Dialect.valoueOfName(dbType);
 		}
 		Mapper mappers = nodeProperties.getMapper();
-		if(mappers==null){
-			mappers=Mapper.valueOfDialect(dialect);
+		if (mappers == null) {
+			mappers = Mapper.valueOfDialect(dialect);
 		}
 		String basepackage = nodeProperties.getBasePackage();
 		if (StringUtils.isEmpty(basepackage)) {
 			log.warn("BasePackage为空，db配置异常,当前配置数据源对象的名字{}", druidNodeName);
-			basepackage="";
+			basepackage = "";
 		}
 		boolean primary = nodeProperties.isPrimary();
-		String dataSourceName = druidNodeName+"DataSource" ;
-		String dataSourceMasterName = druidNodeName+"DataSource-Master" ;
-		String jdbcTemplateName = druidNodeName+"JdbcTemplate" ;
+		String dataSourceName = druidNodeName + "DataSource";
+		// String dataSourceMasterName = druidNodeName + "DataSource-Master";
+		String jdbcTemplateName = druidNodeName + "JdbcTemplate";
 		String transactionManagerName = druidNodeName;
 		String sqlSessionFactoryBeanName = druidNodeName + "RegerSqlSessionFactoryBean";
 		String scannerConfigurerName = druidNodeName + "RegerScannerConfigurer";
 
 		AbstractBeanDefinition dataSource = super.createDataSource(nodeProperties, defaultProperties, dataSourceName);
-		AbstractBeanDefinition dataSourceMaster = super.createDataSourceMaster(dataSourceName);
+		// AbstractBeanDefinition dataSourceMaster =
+		// super.createDataSourceMaster(dataSourceName);
 		AbstractBeanDefinition jdbcTemplate = super.createJdbcTemplate(dataSourceName);
-		AbstractBeanDefinition transactionManager = super.createTransactionManager(dataSourceMasterName);
+		AbstractBeanDefinition transactionManager = super.createTransactionManager(dataSourceName);
 
-		AbstractBeanDefinition sqlSessionFactoryBean = super.createSqlSessionFactoryBean(dataSourceName, mapperPackage, typeAliasesPackage, dialect, configuration);
-		AbstractBeanDefinition scannerConfigurer = super.createScannerConfigurerBean(sqlSessionFactoryBeanName, basepackage,mappers, order);
+		AbstractBeanDefinition sqlSessionFactoryBean = super.createSqlSessionFactoryBean(dataSourceName, mapperPackage,
+				typeAliasesPackage, dialect, configuration);
+		AbstractBeanDefinition scannerConfigurer = super.createScannerConfigurerBean(sqlSessionFactoryBeanName,
+				basepackage, mappers, order, style);
 
 		dataSource.setLazyInit(true);
 		dataSource.setPrimary(primary);
 		dataSource.setScope(BeanDefinition.SCOPE_SINGLETON);
-		dataSourceMaster.setLazyInit(true);
-		dataSourceMaster.setScope(BeanDefinition.SCOPE_SINGLETON);
+		// dataSourceMaster.setLazyInit(true);
+		// dataSourceMaster.setScope(BeanDefinition.SCOPE_SINGLETON);
 		jdbcTemplate.setLazyInit(true);
 		jdbcTemplate.setPrimary(primary);
 		jdbcTemplate.setScope(BeanDefinition.SCOPE_SINGLETON);
@@ -165,15 +174,16 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 		scannerConfigurer.setLazyInit(true);
 		scannerConfigurer.setPrimary(primary);
 		scannerConfigurer.setScope(BeanDefinition.SCOPE_SINGLETON);
-		
+
 		registry.registerBeanDefinition(dataSourceName, dataSource);
-		registry.registerBeanDefinition(dataSourceMasterName, dataSourceMaster);
+		// registry.registerBeanDefinition(dataSourceMasterName,
+		// dataSourceMaster);
 		registry.registerBeanDefinition(jdbcTemplateName, jdbcTemplate);
 		registry.registerBeanDefinition(transactionManagerName, transactionManager);
 		registry.registerBeanDefinition(sqlSessionFactoryBeanName, sqlSessionFactoryBean);
 		registry.registerBeanDefinition(scannerConfigurerName, scannerConfigurer);
-		
-		if(primary){
+
+		if (primary) {
 			registry.registerAlias(dataSourceName, "dataSource");
 			registry.registerAlias(jdbcTemplateName, "jdbcTemplate");
 			registry.registerAlias(transactionManagerName, "transactionManager");
@@ -181,12 +191,13 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean implements
 	}
 
 	@Bean
-	public DataSourceAspect dataSourceAspect(){
+	public DataSourceAspect dataSourceAspect() {
 		return new DataSourceAspect();
 	}
-	
+
 	@Bean
-	public DataSourceInvalidRetry dataSourceInvalidRetry(){
+	public DataSourceInvalidRetry dataSourceInvalidRetry() {
 		return new DataSourceInvalidRetry();
 	}
+
 }

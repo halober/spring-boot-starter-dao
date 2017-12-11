@@ -29,6 +29,7 @@ import com.alibaba.druid.util.JdbcUtils;
 import com.reger.datasource.properties.DruidProperties;
 import com.reger.datasource.properties.MybatisNodeProperties;
 
+import tk.mybatis.mapper.code.Style;
 import tk.mybatis.spring.mapper.MapperScannerConfigurer;
 
 public abstract class AbstractDataBaseBean {
@@ -177,9 +178,12 @@ public abstract class AbstractDataBaseBean {
 	}
 
 	protected final AbstractBeanDefinition createScannerConfigurerBean(String sqlSessionFactoryName, String basepackage,
-			Mapper mappers, Order order) {
+			Mapper mappers, Order order,Style style) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.genericBeanDefinition(MapperScannerConfigurer.class);
 		Properties properties = new Properties();
+		if(style!=null){
+			properties.setProperty("style", style.name());
+		}
 		properties.setProperty("notEmpty", "true");
 		properties.setProperty("ORDER", order != null ? order.order : Order.BEFORE.order);
 		properties.setProperty("mappers", mappers != null ? mappers.mapper : Mapper.DEFAULT.mapper);

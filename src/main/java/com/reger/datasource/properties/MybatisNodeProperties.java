@@ -6,6 +6,8 @@ import com.reger.datasource.core.Dialect;
 import com.reger.datasource.core.Mapper;
 import com.reger.datasource.core.Order;
 
+import tk.mybatis.mapper.code.Style;
+
 public class MybatisNodeProperties {
 	/**
 	 * mybatis mapper接口文件的配置位置，该值不可以为空
@@ -24,6 +26,12 @@ public class MybatisNodeProperties {
 	 * </br> 默认值为 BEFORE
 	 */
 	private Order order = Order.BEFORE;
+	
+	/**
+	 * mybatis通用mapper中列字段默认转化方式，
+	 * normal:原值,camelhump:驼峰转下划线,uppercase:转换为大写, lowercase:转换为小写,camelhumpAndUppercase:驼峰转下划线大写形式,camelhumpAndLowercase:驼峰转下划线小写形式
+	 */
+	private Style style=null;
 	/**
 	 * mybatis通用mapper使用的mapper接口集合,mysqldb时使用使用 MYSQL,SqlServer 时使用MSSQL,其它db类型时使用DEFAULT，可以根据dialect自动判断
 	 * <br> 默认值是 null
@@ -50,6 +58,15 @@ public class MybatisNodeProperties {
 	 * 多个丛库的配置信息，可以为空
 	 */
 	private List<DruidProperties> slaves;
+
+	
+	public Style getStyle() {
+		return style;
+	}
+
+	public void setStyle(Style style) {
+		this.style = style;
+	}
 
 	public boolean isPrimary() {
 		return primary;
