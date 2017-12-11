@@ -179,6 +179,7 @@ spring:
       user:                                                       # 该数据点的名字
         order: after                                              # mybatis生成主键的顺序，如果要在insert into 数据前获得主键，配置为 BEFORE，否则配置为 AFTER 默认值为 BEFORE
         mapper: MYSQL                                             # mybatis通用mapper使用的mapper接口集合,mysqldb时使用使用 MYSQL,SqlServer 时使用MSSQL,其它db类型时使用DEFAULT， 默认值是 DEFAULT
+        style: normal                                             # mybatis通用mapper中列字段默认转化方式
         primary: false                                            # 是否是默认的数据对象， 最多只有一个为true，如果配置多个只有第一个生效
         base-package: com.reger.test.user.dao                     # mybatis mapper接口文件的配置位置，该值不可以为空，可以用正则匹配，多个用逗号分隔
         mapper-package: com.reger.test.user.mapper                # mybatis mapper 的xml配置文件的位置 ，该值最好不要为空，可以用正则匹配，多个用逗号分隔
@@ -194,6 +195,7 @@ spring:
         order: after
         mapper: MYSQL
         primary: true
+        style: normal                                             # mybatis通用mapper中列字段默认转化方式
         base-package: com.reger.test.base.dao
         mapper-package: com.reger.test.base.mapper
         type-aliases-package: 'com.reger.test.base.model'
