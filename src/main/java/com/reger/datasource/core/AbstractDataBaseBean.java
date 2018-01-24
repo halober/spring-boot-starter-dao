@@ -178,15 +178,20 @@ public abstract class AbstractDataBaseBean {
 	}
 
 	protected final AbstractBeanDefinition createScannerConfigurerBean(String sqlSessionFactoryName, String basepackage,
-			Mapper mappers, Order order,Style style) {
+			Mapper mappers, Order order,Style style, Properties properties) {
 		BeanDefinitionBuilder bdb = BeanDefinitionBuilder.genericBeanDefinition(MapperScannerConfigurer.class);
-		Properties properties = new Properties();
+		if(properties==null){
+			properties = new Properties();
+		}
 		if(style!=null){
 			properties.setProperty("style", style.name());
 		}
-		properties.setProperty("notEmpty", "true");
-		properties.setProperty("ORDER", order != null ? order.order : Order.BEFORE.order);
-		properties.setProperty("mappers", mappers != null ? mappers.mapper : Mapper.DEFAULT.mapper);
+		if(order!=null){
+			properties.setProperty("ORDER", order.order);
+		}
+		if(mappers!=null){
+			properties.setProperty("mappers",  mappers.mapper);
+		}
 		bdb.addPropertyValue("properties", properties);
 		bdb.addPropertyValue("sqlSessionFactoryBeanName", sqlSessionFactoryName);
 		bdb.addPropertyValue("basePackage", basepackage);

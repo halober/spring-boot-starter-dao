@@ -1,6 +1,7 @@
 package com.reger.datasource.properties;
 
 import java.util.List;
+import java.util.Properties;
 
 import com.reger.datasource.core.Dialect;
 import com.reger.datasource.core.Mapper;
@@ -43,6 +44,11 @@ public class MybatisNodeProperties {
 	 * 数据库方言，默认值为空,如果为空可以根据数据库链接字符串判断
 	 */
 	private Dialect dialect=null;
+	
+	/**
+	 * mybatis配置参数
+	 */
+	private Properties properties;
 	/**
 	 * 是否是默认的DB对象， 
 	 * </br默认值  false，
@@ -138,6 +144,14 @@ public class MybatisNodeProperties {
 
 	public void setDialect(Dialect dialect) {
 		this.dialect = dialect;
+	}
+
+	public Properties getProperties() {
+		return properties;
+	}
+
+	public void setProperties(Properties properties) {
+		this.properties = properties;
 	}
 	
 }

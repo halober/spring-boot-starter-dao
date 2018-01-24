@@ -155,7 +155,7 @@ public class DataSourceAutoConfiguration extends AbstractDataBaseBean
 		AbstractBeanDefinition sqlSessionFactoryBean = super.createSqlSessionFactoryBean(dataSourceName, mapperPackage,
 				typeAliasesPackage, dialect, configuration);
 		AbstractBeanDefinition scannerConfigurer = super.createScannerConfigurerBean(sqlSessionFactoryBeanName,
-				basepackage, mappers, order, style);
+				basepackage, mappers, order, style,nodeProperties.getProperties());
 
 		dataSource.setLazyInit(true);
 		dataSource.setPrimary(primary);
