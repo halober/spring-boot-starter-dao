@@ -228,9 +228,9 @@ public class DruidProperties {
 
 	public DruidProperties defaultEmpty() {
 		DruidProperties druidProperties = new DruidProperties();
-		druidProperties.initialSize = 1;
-		druidProperties.minIdle = 1;
-		druidProperties.maxActive = 20;
+		druidProperties.initialSize = 5;
+		druidProperties.minIdle = 10;
+		druidProperties.maxActive = 500;
 		
 		druidProperties.maxWait = 60000L;
 
